@@ -1,6 +1,6 @@
 # Mini-Grammar Lexical Analyzer
 
-This project implements a **lexical analyzer (scanner)** for a mini programming language grammar.
+This project implements a **lexical analyzer (scanner)** for a mini programming language grammar based on c programming language.
 
 The scanner reads a source program and converts it into tokens using a **Deterministic Finite Automaton (DFA)**.
 
@@ -47,15 +47,18 @@ The lexical analyzer follows the DFA described in the report:
 | S3 | Operator |
 | S4 | Error |
 
+
 ## Project Structure
 
+The folder structure is as follows:
 
-.
-├── scanner.c
+mini-lexer/
+│
+├── lexer.c
 ├── program.txt
 ├── Makefile
-├── .gitignore
-└── README.md
+├── README.md
+└── .gitignore
 
 
 ## Compilation
@@ -112,15 +115,11 @@ NUMBER: 1
 
 Group 24 – Compiler Construction
 
-5. Final Project Structure
+     ODHIAMBO JOHN OTIENO - SCS3/147357/2023
+     MICHAEL MUTETI -
+     ABBA BIKO WERE -
+     MARK WAFULA -
 
-Your folder should look like this:
 
-mini-lexer/
-│
-├── scanner.c
-├── program.txt
-├── Makefile
-├── README.md
-└── .gitignore
+
 
