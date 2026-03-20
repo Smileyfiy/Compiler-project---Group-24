@@ -5,10 +5,10 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 
 # Executable name
-TARGET = scanner
+TARGET = lexer
 
 # Source file
-SRC = scanner.c
+SRC = lexer.c
 
 # Default rule
 all: $(TARGET)
