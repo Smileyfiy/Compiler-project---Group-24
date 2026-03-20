@@ -1,0 +1,11 @@
+int count1 = 5
+char x = 2
+
+while count1 % 2
+count1 = count1 + 1
+
+for x = 3
+x = x * 2
+
+if count1
+count1 = count1 + 5

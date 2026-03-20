@@ -1,0 +1,21 @@
+# GCC compiled binaries
+scanner
+*.out
+*.exe
+*.o
+
+# Object files
+*.obj
+
+# Temporary files
+*.log
+*.tmp
+*~
+
+# Editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
