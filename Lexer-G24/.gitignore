@@ -1,5 +1,5 @@
 # GCC compiled binaries
-scanner
+lexer
 *.out
 *.exe
 *.o
