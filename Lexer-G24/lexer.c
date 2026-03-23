@@ -3,7 +3,7 @@
 This contains the implementation of the lexer for the sub-language specified by group 24
 The members include : 
      ODHIAMBO JOHN OTIENO - SCS3/147357/2023
-     MICHAEL MUTETI
+     MICHAEL MUTETI - SCS3/147532/2023
      ABBA BIKO WERE
      MARK WAFULA
 
