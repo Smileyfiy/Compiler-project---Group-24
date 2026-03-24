@@ -4,7 +4,7 @@ This contains the implementation of the lexer for the sub-language specified by 
 The members include : 
      ODHIAMBO JOHN OTIENO - SCS3/147357/2023
      MICHAEL MUTETI - SCS3/147532/2023
-     ABBA BIKO WERE
+     ABBA BIKO WERE - SCS3/146750/2023
      MARK WAFULA
 
 */
