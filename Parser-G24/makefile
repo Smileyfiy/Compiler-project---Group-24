@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11
 TARGET = parser
 
-SRCS = main.c parser.c
+SRCS = main.c parser.c parse_tree.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
