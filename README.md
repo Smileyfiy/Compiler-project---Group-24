@@ -1,6 +1,6 @@
 # Compiler Project - Group 24
 
-## 🎯 Overview
+## Overview
 
 This is a complete **two-stage compiler** for a mini-language that processes a single `program.txt` file through:
 
@@ -24,7 +24,7 @@ That's it! You'll see:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Compiler-project---Group-24/
@@ -55,7 +55,7 @@ Compiler-project---Group-24/
 
 ---
 
-## 🔄 The Pipeline
+## The Pipeline
 
 ```
 program.txt (YOUR INPUT)
@@ -69,7 +69,7 @@ program.txt (YOUR INPUT)
 
 ---
 
-## 📝 Example Usage
+## Example Usage
 
 ### Example 1: Simple Program
 ```bash
@@ -91,9 +91,9 @@ printf "int a\nint b\na = 10\nb = 20\nif a\na = a + b\n" > program.txt
 
 ---
 
-## ✨ Features
+## Features
 
-### ✅ Lexer (Lexer-G24)
+### Lexer (Lexer-G24)
 - Scans mini-language source code
 - Generates tokens:
   - **Keywords**: `int`, `char`, `if`, `while`, `for`
@@ -101,7 +101,7 @@ printf "int a\nint b\na = 10\nb = 20\nif a\na = a + b\n" > program.txt
   - **Numbers**: numeric constants
   - **Operators**: `=`, `+`, `*`, `%`
 
-### ✅ Parser (Parser-G24)
+### Parser (Parser-G24)
 - Recursive-descent LL(1) parser
 - Generates Abstract Syntax Tree (AST)
 - Full grammar coverage:
@@ -110,7 +110,7 @@ printf "int a\nint b\na = 10\nb = 20\nif a\na = a + b\n" > program.txt
   - Expressions (with operator precedence)
   - Control structures (if, while, for)
 
-### ✅ Pipeline Script
+### Pipeline Script
 - Auto-compiles components if needed
 - Copies input to both components
 - Displays outputs separately
@@ -118,7 +118,7 @@ printf "int a\nint b\na = 10\nb = 20\nif a\na = a + b\n" > program.txt
 
 ---
 
-## 🧠 Grammar Supported
+## Grammar Supported
 
 ```
 Program     → Statements
@@ -135,7 +135,7 @@ Factor      → IDENTIFIER | NUMBER
 
 ---
 
-## 📊 Sample Output
+## Sample Output
 
 ### Lexer Output
 ```
@@ -184,7 +184,7 @@ NUMBER: 5
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 | Document | Purpose |
 |---|---|
@@ -197,7 +197,7 @@ NUMBER: 5
 
 ---
 
-## 👥 Team & Roles
+## Team & Roles
 
 | Member | Role | Assignment |
 |---|---|---|
@@ -208,7 +208,7 @@ NUMBER: 5
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Step 1: Verify Setup
 ```bash
@@ -239,7 +239,7 @@ echo "x = 5" >> program.txt
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Script not executable
 ```bash
@@ -261,7 +261,7 @@ make -C Parser-G24
 
 ---
 
-## 🎓 For Demonstration
+## For Demonstration
 
 ### Demo Checklist
 - [x] Source: `cat program.txt`
@@ -278,7 +278,7 @@ make -C Parser-G24
 
 ---
 
-## 📋 Valid Language Constructs
+## Valid Language Constructs
 
 ```
 /* Declarations */
@@ -307,9 +307,9 @@ for variable = expression
 
 ---
 
-## 📈 Project Status
+## Project Status
 
-**Status**: ✅ **COMPLETE**
+**Status**: **COMPLETE**
 
 - [x] Lexer implementation
 - [x] Parser implementation with parse tree
@@ -321,7 +321,7 @@ for variable = expression
 
 ---
 
-## 📞 Quick Help
+## Quick Help
 
 For quick answers, see:
 - **How to run?** → [QUICK_START.md](QUICK_START.md)
@@ -331,7 +331,7 @@ For quick answers, see:
 
 ---
 
-## ✅ Ready for April 24, 2026 Demo
+## Ready for April 24, 2026 Demo
 
 All components tested and working. Ready for live demonstration with any sample input!
 
