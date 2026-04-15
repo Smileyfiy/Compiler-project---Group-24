@@ -1,4 +1,4 @@
-# ✅ UNIFIED COMPILER PIPELINE - READY TO USE
+#  UNIFIED COMPILER PIPELINE - READY TO USE
 
 ## What You Now Have
 
@@ -10,7 +10,7 @@ A **complete, working compiler** that:
 
 ---
 
-## 🚀 How to Use (3 Steps)
+##  How to Use (3 Steps)
 
 ### Step 1: Create Your Program
 ```bash
@@ -30,13 +30,13 @@ printf "int x\nx = 5 + 3\n" > program.txt
 
 ### Step 3: View Results
 The script automatically outputs:
-- ✅ **STEP 1**: Your source program
-- ✅ **STEP 2**: Lexer tokens (word by word breakdown)
-- ✅ **STEP 3**: Parser tree (grammar structure)
+-  **STEP 1**: Your source program
+-  **STEP 2**: Lexer tokens (word by word breakdown)
+-  **STEP 3**: Parser tree (grammar structure)
 
 ---
 
-## 📊 Real Example
+##  Real Example
 
 ### Your program.txt:
 ```
@@ -169,7 +169,7 @@ NUMBER: 2
 
 ---
 
-## 📚 Files You Have
+##  Files You Have
 
 ```
 /home/john/dev/projects/Compiler-project---Group-24/
@@ -195,19 +195,19 @@ NUMBER: 2
 
 ---
 
-## 🎯 Key Features
+##  Key Features
 
-✅ **Single Input File**: One `program.txt` for everything  
-✅ **Two Components**: Lexer → Parser  
-✅ **Separate Outputs**: Tokens and parse tree shown distinctly  
-✅ **Fully Automated**: One command (`./compile.sh`) runs both  
-✅ **Auto-Compilation**: Compiles if binaries missing  
-✅ **Color Output**: Visual separation of stages  
-✅ **Error Handling**: Clear error messages if parse fails  
+ **Single Input File**: One `program.txt` for everything  
+ **Two Components**: Lexer → Parser  
+ **Separate Outputs**: Tokens and parse tree shown distinctly  
+ **Fully Automated**: One command (`./compile.sh`) runs both  
+ **Auto-Compilation**: Compiles if binaries missing  
+ **Color Output**: Visual separation of stages  
+ **Error Handling**: Clear error messages if parse fails  
 
 ---
 
-## 🔤 What the Lexer Shows
+##  What the Lexer Shows
 
 Each token on a line by itself: `TOKEN_TYPE: value`
 
@@ -220,7 +220,7 @@ NUMBER: 10          ← Numeric value
 
 ---
 
-## 🌳 What the Parser Shows
+##  What the Parser Shows
 
 The grammar rules applied, formatted as a tree:
 
@@ -245,7 +245,7 @@ The grammar rules applied, formatted as a tree:
 
 ---
 
-## 💡 Quick Examples to Try
+##  Quick Examples to Try
 
 ### Example 1: Simplest
 ```bash
@@ -279,7 +279,7 @@ printf "int a\nint b\na = 5\nb = 10\nif a\na = a + b\n" > program.txt && ./compi
 
 ---
 
-## 🎓 For Your Demo on April 24
+##  For Your Demo on April 24
 
 1. **Show the script**: `cat compile.sh` (if needed)
 2. **Show your input**: `cat program.txt`
@@ -291,7 +291,7 @@ printf "int a\nint b\na = 5\nb = 10\nif a\na = a + b\n" > program.txt && ./compi
 
 ---
 
-## ✨ Pipeline Architecture (Visual)
+##  Pipeline Architecture (Visual)
 
 ```
                     program.txt
@@ -333,7 +333,7 @@ printf "int a\nint b\na = 5\nb = 10\nif a\na = a + b\n" > program.txt && ./compi
 
 ---
 
-## 🔧 Troubleshooting
+##  Troubleshooting
 
 ### "Command not found: compile.sh"
 ```bash
@@ -369,7 +369,7 @@ Check your syntax:
 
 ---
 
-## ✅ Everything Working?
+##  Everything Working?
 
 Run this quick test:
 ```bash
@@ -386,7 +386,7 @@ You should see:
 
 ---
 
-## 📖 For More Details
+##  For More Details
 
 | Need | Read |
 |---|---|
@@ -399,7 +399,7 @@ You should see:
 
 ---
 
-## 🎉 Summary
+##  Summary
 
 **You now have a complete compiler that:**
 - Takes ONE input file (`program.txt`)
@@ -408,7 +408,7 @@ You should see:
 - Shows everything SEPARATE and CLEAR
 - Handles ANY valid mini-language program
 
-**Ready for your April 24, 2026 demo!** ✅
+**Ready for your April 24, 2026 demo!** 
 
 ---
 

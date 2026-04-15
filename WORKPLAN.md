@@ -52,18 +52,18 @@ Factor      → IDENTIFIER | NUMBER
 
 | # | Task/Module | Description | Estimated Effort | Responsibility | Status |
 |---|---|---|---|---|---|
-| 1 | Token Type Definition | Define all token types (keywords, operators, identifiers, numbers) | 0.5 days | JOHN OTIENO | ✅ Complete |
-| 2 | Lexer Integration | Create token reader interface for parser | 1 day | JOHN OTIENO | ✅ Complete |
-| 3 | Parse Tree Data Structure | Design AST node structure for parse tree representation | 1.5 days | MICHAEL MUTETI | ✅ Complete |
-| 4 | Parser Core (Base Functions) | Implement parser initialization, token management, error handling | 1 day | MICHAEL MUTETI | ✅ Complete |
-| 5 | Statement Parsing Functions | Implement Declaration, Assignment, IfStatement, WhileStatement, ForStatement | 2 days | ABBA BIKO WERE | ⏳ In Progress |
-| 6 | Expression Parsing Functions | Implement Expression, AddExpr, Term, MulExpr, Factor | 1.5 days | ABBA BIKO WERE | ⏳ In Progress |
-| 7 | Parse Tree Generation | Modify parser to build and return AST nodes | 1.5 days | MARK WAFULA | ⏳ In Progress |
-| 8 | Parse Tree Printing | Implement visual representation of parse tree | 1 day | MARK WAFULA | ⏳ In Progress |
-| 9 | Error Handling & Recovery | Implement detailed error messages and recovery | 1 day | JOHN OTIENO | ⏳ In Progress |
-| 10 | Sample Test Programs | Create comprehensive test cases | 1 day | MICHAEL MUTETI | ⏳ In Progress |
-| 11 | Integration Testing | Test lexer → parser pipeline | 1 day | ABBA BIKO WERE | ⏳ In Progress |
-| 12 | Documentation & Report | Create final report with screenshots and token traces | 1 day | MARK WAFULA | ⏳ In Progress |
+| 1 | Token Type Definition | Define all token types (keywords, operators, identifiers, numbers) | 0.5 days | JOHN OTIENO |  Complete |
+| 2 | Lexer Integration | Create token reader interface for parser | 1 day | JOHN OTIENO |  Complete |
+| 3 | Parse Tree Data Structure | Design AST node structure for parse tree representation | 1.5 days | MICHAEL MUTETI |  Complete |
+| 4 | Parser Core (Base Functions) | Implement parser initialization, token management, error handling | 1 day | MICHAEL MUTETI |  Complete |
+| 5 | Statement Parsing Functions | Implement Declaration, Assignment, IfStatement, WhileStatement, ForStatement | 2 days | ABBA BIKO WERE |  In Progress |
+| 6 | Expression Parsing Functions | Implement Expression, AddExpr, Term, MulExpr, Factor | 1.5 days | ABBA BIKO WERE |  In Progress |
+| 7 | Parse Tree Generation | Modify parser to build and return AST nodes | 1.5 days | MARK WAFULA |  In Progress |
+| 8 | Parse Tree Printing | Implement visual representation of parse tree | 1 day | MARK WAFULA |  In Progress |
+| 9 | Error Handling & Recovery | Implement detailed error messages and recovery | 1 day | JOHN OTIENO |  In Progress |
+| 10 | Sample Test Programs | Create comprehensive test cases | 1 day | MICHAEL MUTETI |  In Progress |
+| 11 | Integration Testing | Test lexer → parser pipeline | 1 day | ABBA BIKO WERE |  In Progress |
+| 12 | Documentation & Report | Create final report with screenshots and token traces | 1 day | MARK WAFULA |  In Progress |
 
 **Total Estimated Effort:** ~14.5 days (distributed over 3 weeks)
 
@@ -160,27 +160,27 @@ Factor      → IDENTIFIER | NUMBER
 ## 5. Deliverables
 
 ### **Source Code**
-- ✅ [parser.h](parser.h) - Header with token definitions and data structures
-- ✅ [parser.c](parser.c) - Parser implementation with all grammar rules
-- ✅ [main.c](main.c) - Driver program
-- 📝 parse_tree.h/c - Parse tree generation functions (in progress)
-- 📝 parse_tree_print.h/c - Tree visualization (in progress)
+-  [parser.h](parser.h) - Header with token definitions and data structures
+-  [parser.c](parser.c) - Parser implementation with all grammar rules
+-  [main.c](main.c) - Driver program
+-  parse_tree.h/c - Parse tree generation functions (in progress)
+-  parse_tree_print.h/c - Tree visualization (in progress)
 
 ### **Documentation**
-- ✅ [Grammar Specification](readme.md) with FIRST/FOLLOW sets
-- ✅ Workplan (this document)
-- 📝 Token trace from sample program
-- 📝 Parse tree outputs
-- 📝 Final assessment report
+-  [Grammar Specification](readme.md) with FIRST/FOLLOW sets
+-  Workplan (this document)
+-  Token trace from sample program
+-  Parse tree outputs
+-  Final assessment report
 
 ### **Test Cases**
-- ✅ Simple declaration test
-- ✅ Expression with operators
-- ✅ If statement
-- ✅ While loop
-- ✅ For loop
-- 📝 Complex nested example
-- 📝 Error case examples
+-  Simple declaration test
+-  Expression with operators
+-  If statement
+-  While loop
+-  For loop
+-  Complex nested example
+-  Error case examples
 
 ---
 
@@ -235,12 +235,12 @@ parse_program()
 ### **Test Case Categories**
 | Category | Examples | Status |
 |---|---|---|
-| Declarations | `int x`, `char y` | ✅ Complete |
-| Assignments | `x = 5`, `x = y + 2` | ✅ Complete |
-| Expressions | `5 + 3`, `x * 2 % 3` | ✅ Complete |
-| Control Flow | `if x ...`, `while x ...`, `for x=1 ...` | ✅ Complete |
-| Compound | Multiple statements, nested if/while | ⏳ In Progress |
-| Error Cases | Missing tokens, type mismatches | ⏳ In Progress |
+| Declarations | `int x`, `char y` |  Complete |
+| Assignments | `x = 5`, `x = y + 2` |  Complete |
+| Expressions | `5 + 3`, `x * 2 % 3` |  Complete |
+| Control Flow | `if x ...`, `while x ...`, `for x=1 ...` |  Complete |
+| Compound | Multiple statements, nested if/while |  In Progress |
+| Error Cases | Missing tokens, type mismatches |  In Progress |
 
 ---
 

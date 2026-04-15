@@ -7,7 +7,7 @@ This is a complete **two-stage compiler** for a mini-language that processes a s
 1. **Lexer** (Lexical Analysis) → Generates tokens
 2. **Parser** (Syntax Analysis) → Generates parse tree
 
-## ⚡ Quick Start (30 seconds)
+## Quick Start (30 seconds)
 
 ```bash
 # Navigate to project directory

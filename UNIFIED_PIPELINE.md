@@ -243,14 +243,14 @@ Source Code → Lexer → Tokens → Parser → Parse Tree (AST)
 ## Automation Features
 
 The `compile.sh` script:
-- ✅ Checks for program.txt existence
-- ✅ Verifies both projects exist
-- ✅ Auto-compiles if binaries missing
-- ✅ Copies program.txt to both directories
-- ✅ Runs lexer and shows output
-- ✅ Runs parser and shows output
-- ✅ Color-codes output for readability
-- ✅ Shows pipeline completion status
+-  Checks for program.txt existence
+-  Verifies both projects exist
+-  Auto-compiles if binaries missing
+-  Copies program.txt to both directories
+-  Runs lexer and shows output
+-  Runs parser and shows output
+-  Color-codes output for readability
+-  Shows pipeline completion status
 
 ---
 
@@ -301,7 +301,7 @@ cd Parser-G24 && ./parser
 
 ---
 
-**Ready for live demonstration on April 24, 2026** ✅
+**Ready for live demonstration on April 24, 2026** 
 
 Members can explain:
 - JOHN: Lexer/Token integration  

@@ -19,9 +19,9 @@ printf "int x\nx = 10\n" > program.txt
 ### Step 3: View Outputs
 
 The script automatically:
-- ✅ Shows your source program
-- ✅ Runs the **Lexer** and displays **tokens**
-- ✅ Runs the **Parser** and displays **parse tree**
+-  Shows your source program
+-  Runs the **Lexer** and displays **tokens**
+-  Runs the **Parser** and displays **parse tree**
 
 ---
 
@@ -270,12 +270,12 @@ ERROR: Expected EOF
 
 ## Key Points for Demonstration
 
-✅ **Single Input**: One `program.txt` file  
-✅ **Two-Stage Process**: Lexer → Parser  
-✅ **Separate Outputs**: Token list + Parse tree shown distinctly  
-✅ **Fully Automated**: One command (`./compile.sh`) does everything  
-✅ **Color-Coded**: Visual separation of stages  
-✅ **Error Handling**: Reports issues clearly  
+ **Single Input**: One `program.txt` file  
+ **Two-Stage Process**: Lexer → Parser  
+ **Separate Outputs**: Token list + Parse tree shown distinctly  
+ **Fully Automated**: One command (`./compile.sh`) does everything  
+ **Color-Coded**: Visual separation of stages  
+ **Error Handling**: Reports issues clearly  
 
 ---
 
