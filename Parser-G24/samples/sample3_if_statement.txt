@@ -1,4 +1,0 @@
-int count
-count = 10
-if count
-count = count + 1

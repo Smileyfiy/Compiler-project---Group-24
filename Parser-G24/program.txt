@@ -1,9 +1,6 @@
-int count
-int sum
-count = 5
-sum = 0
-while count
-sum = sum + count
-count = count + 1
-if sum
-count = 10
+int x
+int y
+x = 5
+y = 10
+if x
+y = y * 2
