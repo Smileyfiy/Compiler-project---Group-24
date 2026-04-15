@@ -49,6 +49,7 @@ int main(){
     char ch;
     char lexeme[100];
     int i;
+    int line_number = 1;  /* Track line numbers */
     
     /* Buffer for unprocessed characters */
     char unprocessed[100];
@@ -95,8 +96,13 @@ int main(){
                 else if(ch=='=' || ch=='+' || ch=='*' || ch=='-' || ch=='%' || ch=='<' || ch=='>')
                 {  /* operator */
                     state = S3;
-                    printf("OPERATOR: %c\n", ch);
+                    printf("LINE %d: OPERATOR: %c\n", line_number, ch);
                     state = S0;
+                }
+
+                else if(ch == '\n'){
+                    line_number++;  /* Increment line number on newline */
+                    continue;
                 }
 
                 else if(isspace(ch)){
@@ -105,7 +111,7 @@ int main(){
 
                 else{
                     state = S4;
-                    printf("ERROR: %c\n", ch);
+                    printf("LINE %d: ERROR: Invalid character '%c'\n", line_number, ch);
                     state = S0;
                 }
 
@@ -126,7 +132,7 @@ int main(){
                         char keyword[100];
                         strncpy(keyword, lexeme, keywordLen);
                         keyword[keywordLen] = '\0';
-                        printf("KEYWORD: %s\n", keyword);
+                        printf("LINE %d: KEYWORD: %s\n", line_number, keyword);
                         
                         /* Put remainder in unprocessed buffer */
                         unprocessed_count = i - keywordLen + 1;
@@ -137,7 +143,7 @@ int main(){
                         unprocessed[i - keywordLen] = ch;
                     }
                     else{
-                        printf("IDENTIFIER: %s\n", lexeme);
+                        printf("LINE %d: IDENTIFIER: %s\n", line_number, lexeme);
                         
                         /* Put current character in unprocessed buffer */
                         unprocessed_count = 1;
@@ -158,7 +164,7 @@ int main(){
                 }
                 else{
                     lexeme[i] = '\0';
-                    printf("NUMBER: %s\n", lexeme);
+                    printf("LINE %d: NUMBER: %s\n", line_number, lexeme);
 
                     /* Put current character in unprocessed buffer */
                     unprocessed_count = 1;
@@ -181,23 +187,23 @@ int main(){
             char keyword[100];
             strncpy(keyword, lexeme, keywordLen);
             keyword[keywordLen] = '\0';
-            printf("KEYWORD: %s\n", keyword);
+            printf("LINE %d: KEYWORD: %s\n", line_number, keyword);
             
             /* Check if there's a remainder */
             if(keywordLen < i){
                 char remainder[100];
                 strcpy(remainder, lexeme + keywordLen);
-                printf("IDENTIFIER: %s\n", remainder);
+                printf("LINE %d: IDENTIFIER: %s\n", line_number, remainder);
             }
         }
         else{
-            printf("IDENTIFIER: %s\n", lexeme);
+            printf("LINE %d: IDENTIFIER: %s\n", line_number, lexeme);
         }
     }
 
     if(state == S2){
         lexeme[i] = '\0';
-        printf("NUMBER: %s\n", lexeme);
+        printf("LINE %d: NUMBER: %s\n", line_number, lexeme);
     }
 
     fclose(fp);
