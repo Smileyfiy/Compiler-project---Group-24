@@ -17,13 +17,30 @@ The members include :
 char *keywords[] = {"if","while","for","int","char"};
 int keywordCount = 5;
 
-/* Check if lexeme is a keyword */
+/* Check if lexeme is a keyword and return the length, or -1 if not */
 int isKeyword(char *word){
     for(int i=0;i<keywordCount;i++){
         if(strcmp(word,keywords[i])==0)
-            return 1;
+            return strlen(keywords[i]);
     }
-    return 0;
+    return -1;
+}
+
+/* Find the longest keyword prefix in the lexeme */
+int getLongestKeywordPrefix(char *lexeme){
+    char temp[100];
+    
+    for(int len = strlen(lexeme); len >= 1; len--){
+        strncpy(temp, lexeme, len);
+        temp[len] = '\0';
+        
+        for(int i = 0; i < keywordCount; i++){
+            if(strcmp(temp, keywords[i]) == 0){
+                return len;
+            }
+        }
+    }
+    return -1;
 }
 
 int main(){
@@ -32,6 +49,11 @@ int main(){
     char ch;
     char lexeme[100];
     int i;
+    
+    /* Buffer for unprocessed characters */
+    char unprocessed[100];
+    int unprocessed_count = 0;
+    int unprocessed_idx = 0;
 
     /* DFA States */
     enum {S0, S1, S2, S3, S4};
@@ -44,7 +66,14 @@ int main(){
         return 1;
     }
 
-    while((ch = fgetc(fp)) != EOF){
+    while(1){
+        /* Read from unprocessed buffer first, then from file */
+        if(unprocessed_idx < unprocessed_count) {
+            ch = unprocessed[unprocessed_idx++];
+        } else {
+            ch = fgetc(fp);
+            if(ch == EOF) break;
+        }
 
         switch(state){
 
@@ -63,7 +92,8 @@ int main(){
                     lexeme[i++] = ch;
                 }
 
-                else if(ch=='=' || ch=='+' || ch=='*' || ch=='%'){
+                else if(ch=='=' || ch=='+' || ch=='*' || ch=='-' || ch=='%' || ch=='<' || ch=='>')
+                {  /* operator */
                     state = S3;
                     printf("OPERATOR: %c\n", ch);
                     state = S0;
@@ -89,14 +119,33 @@ int main(){
                 }
                 else{
                     lexeme[i] = '\0';
-
-                    if(isKeyword(lexeme))
-                        printf("KEYWORD: %s\n", lexeme);
-                    else
+                    
+                    /* Check for keyword prefix */
+                    int keywordLen = getLongestKeywordPrefix(lexeme);
+                    if(keywordLen > 0){
+                        char keyword[100];
+                        strncpy(keyword, lexeme, keywordLen);
+                        keyword[keywordLen] = '\0';
+                        printf("KEYWORD: %s\n", keyword);
+                        
+                        /* Put remainder in unprocessed buffer */
+                        unprocessed_count = i - keywordLen + 1;
+                        unprocessed_idx = 0;
+                        for(int j = 0; j < i - keywordLen; j++){
+                            unprocessed[j] = lexeme[keywordLen + j];
+                        }
+                        unprocessed[i - keywordLen] = ch;
+                    }
+                    else{
                         printf("IDENTIFIER: %s\n", lexeme);
+                        
+                        /* Put current character in unprocessed buffer */
+                        unprocessed_count = 1;
+                        unprocessed_idx = 0;
+                        unprocessed[0] = ch;
+                    }
 
                     state = S0;
-                    ungetc(ch, fp);
                 }
 
             break;
@@ -111,8 +160,12 @@ int main(){
                     lexeme[i] = '\0';
                     printf("NUMBER: %s\n", lexeme);
 
+                    /* Put current character in unprocessed buffer */
+                    unprocessed_count = 1;
+                    unprocessed_idx = 0;
+                    unprocessed[0] = ch;
+                    
                     state = S0;
-                    ungetc(ch, fp);
                 }
 
             break;
@@ -122,10 +175,24 @@ int main(){
     /* Handle EOF cases */
     if(state == S1){
         lexeme[i] = '\0';
-        if(isKeyword(lexeme))
-            printf("KEYWORD: %s\n", lexeme);
-        else
+        
+        int keywordLen = getLongestKeywordPrefix(lexeme);
+        if(keywordLen > 0){
+            char keyword[100];
+            strncpy(keyword, lexeme, keywordLen);
+            keyword[keywordLen] = '\0';
+            printf("KEYWORD: %s\n", keyword);
+            
+            /* Check if there's a remainder */
+            if(keywordLen < i){
+                char remainder[100];
+                strcpy(remainder, lexeme + keywordLen);
+                printf("IDENTIFIER: %s\n", remainder);
+            }
+        }
+        else{
             printf("IDENTIFIER: %s\n", lexeme);
+        }
     }
 
     if(state == S2){

@@ -4,6 +4,10 @@ This project implements a **lexical analyzer (scanner)** for a mini programming 
 
 The scanner reads a source program and converts it into tokens using a **Deterministic Finite Automaton (DFA)**.
 
+## Key Feature: Keyword Prefix Recognition
+
+The lexer intelligently recognizes keywords even when they appear concatenated with other characters. For example, `ifwhile` is tokenized as two separate keywords: `if` and `while`. This is achieved by checking for the longest matching keyword prefix in any identifier token.
+
 ## Token Types
 
 The lexer recognizes the following tokens:
@@ -87,17 +91,21 @@ and prints the recognized tokens.
 
 ## Example Input
 
-
+ifwhile
+forwhile
 int count1 = 5
-char x = 2
-count1 = count1 + 1
 
 
 ## Example Output
 
-
+KEYWORD: if
+KEYWORD: while
+KEYWORD: for
+KEYWORD: while
 KEYWORD: int
 IDENTIFIER: count1
+OPERATOR: =
+NUMBER: 5
 OPERATOR: =
 NUMBER: 5
 KEYWORD: char
