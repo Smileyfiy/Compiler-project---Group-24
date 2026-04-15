@@ -50,6 +50,7 @@ int main(){
     char lexeme[100];
     int i;
     int line_number = 1;  /* Track line numbers */
+    int error_count = 0;  /* Track errors for exit code */
     
     /* Buffer for unprocessed characters */
     char unprocessed[100];
@@ -112,6 +113,7 @@ int main(){
                 else{
                     state = S4;
                     printf("LINE %d: ERROR: Invalid character '%c'\n", line_number, ch);
+                    error_count++;
                     state = S0;
                 }
 
@@ -207,5 +209,12 @@ int main(){
     }
 
     fclose(fp);
+    
+    /* Return error code if any errors found */
+    if(error_count > 0){
+        fprintf(stderr, "\nLexer failed with %d error(s)\n", error_count);
+        return 1;
+    }
+    
     return 0;
 }
