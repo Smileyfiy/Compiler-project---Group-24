@@ -17,10 +17,10 @@ cd /path/to/Compiler-project---Group-24
 ./compile.sh
 ```
 
-That's it! You'll see:
-- ✅ Your source program
-- ✅ Lexer output (tokens)
-- ✅ Parser output (parse tree)
+The following will be displayed on the terminal:
+-  Your source program (program.txt) 
+-  Lexer output (tokens)
+-  Parser output (parse tree)
 
 ---
 
