@@ -1,6 +1,6 @@
 /*
-LL(1) Parser for Mini-Grammar
-Uses table-driven parsing with tokens from lexer
+LL(1) Parser for Mini-Grammar with Parse Tree Generation
+Uses recursive descent parsing with tokens from lexer
 
 Group 24 Members:
      ODHIAMBO JOHN OTIENO - SCS3/147357/2023
@@ -12,37 +12,20 @@ Group 24 Members:
 #include "parser.h"
 #include <ctype.h>
 
-/* Production rules (indexed by production number)
-   Note: Currently documented for reference; recursive descent parser uses function-based rules */
-static const Production productions[] __attribute__((unused)) = {
-    {NT_PROGRAM, 1, {NT_STATEMENTS}},                                    /* 0: Program → Statements */
-    {NT_STATEMENTS, 2, {NT_STATEMENT, NT_STATEMENTS}},                    /* 1: Statements → Statement Statements */
-    {NT_STATEMENTS, 0, {}},                                               /* 2: Statements → ε */
-    {NT_STATEMENT, 1, {NT_DECLARATION}},                                  /* 3: Statement → Declaration */
-    {NT_STATEMENT, 1, {NT_ASSIGNMENT}},                                   /* 4: Statement → Assignment */
-    {NT_STATEMENT, 1, {NT_IF_STATEMENT}},                                 /* 5: Statement → IfStatement */
-    {NT_STATEMENT, 1, {NT_WHILE_STATEMENT}},                              /* 6: Statement → WhileStatement */
-    {NT_STATEMENT, 1, {NT_FOR_STATEMENT}},                                /* 7: Statement → ForStatement */
-    {NT_DECLARATION, 2, {-1, TOK_KEYWORD_INT}},                           /* 8: Declaration → int IDENTIFIER (special handling) */
-    {NT_DECLARATION, 2, {-1, TOK_KEYWORD_CHAR}},                          /* 9: Declaration → char IDENTIFIER */
-    {NT_ASSIGNMENT, 3, {-1, -1, -1}},                                     /* 10: Assignment → IDENTIFIER = Expression */
-    {NT_IF_STATEMENT, 3, {-1, -1, -1}},                                   /* 11: IfStatement → if Expression Statement */
-    {NT_WHILE_STATEMENT, 3, {-1, -1, -1}},                                /* 12: WhileStatement → while Expression Statement */
-    {NT_FOR_STATEMENT, 3, {-1, -1, -1}},                                  /* 13: ForStatement → for Assignment Statement */
-    {NT_EXPRESSION, 2, {NT_TERM, NT_ADD_EXPR}},                           /* 14: Expression → Term AddExpr */
-    {NT_ADD_EXPR, 3, {-1, NT_TERM, NT_ADD_EXPR}},                         /* 15: AddExpr → + Term AddExpr */
-    {NT_ADD_EXPR, 0, {}},                                                 /* 16: AddExpr → ε */
-    {NT_TERM, 2, {NT_FACTOR, NT_MUL_EXPR}},                               /* 17: Term → Factor MulExpr */
-    {NT_MUL_EXPR, 3, {-1, NT_FACTOR, NT_MUL_EXPR}},                       /* 18: MulExpr → * Factor MulExpr */
-    {NT_MUL_EXPR, 3, {-1, NT_FACTOR, NT_MUL_EXPR}},                       /* 19: MulExpr → % Factor MulExpr */
-    {NT_MUL_EXPR, 0, {}},                                                 /* 20: MulExpr → ε */
-    {NT_FACTOR, 1, {-1}},                                                 /* 21: Factor → IDENTIFIER */
-    {NT_FACTOR, 1, {-1}}                                                  /* 22: Factor → NUMBER */
-};
-
-/* Parsing strategy - simplified stack-based approach */
-#define MAX_STACK 256
-#define MAX_PRODUCTIONS 23
+/* Forward declarations of parsing functions */
+static ParseTreeNode* parse_program(Parser *parser);
+static ParseTreeNode* parse_statements(Parser *parser);
+static ParseTreeNode* parse_statement(Parser *parser);
+static ParseTreeNode* parse_declaration(Parser *parser);
+static ParseTreeNode* parse_assignment(Parser *parser);
+static ParseTreeNode* parse_if_statement(Parser *parser);
+static ParseTreeNode* parse_while_statement(Parser *parser);
+static ParseTreeNode* parse_for_statement(Parser *parser);
+static ParseTreeNode* parse_expression(Parser *parser);
+static ParseTreeNode* parse_add_expr(Parser *parser);
+static ParseTreeNode* parse_term(Parser *parser);
+static ParseTreeNode* parse_mul_expr(Parser *parser);
+static ParseTreeNode* parse_factor(Parser *parser);
 
 /* Lexer interface - reads tokens from file */
 static void lexer_read_token(Parser *parser) {
@@ -148,29 +131,20 @@ void parser_print_error(const char *message) {
 }
 
 /* Recursive descent parser for LL(1) */
-static int parse_program(Parser *parser);
-static int parse_statements(Parser *parser);
-static int parse_statement(Parser *parser);
-static int parse_declaration(Parser *parser);
-static int parse_assignment(Parser *parser);
-static int parse_if_statement(Parser *parser);
-static int parse_while_statement(Parser *parser);
-static int parse_for_statement(Parser *parser);
-static int parse_expression(Parser *parser);
-static int parse_add_expr(Parser *parser);
-static int parse_term(Parser *parser);
-static int parse_mul_expr(Parser *parser);
-static int parse_factor(Parser *parser);
-
-/* Program → Statements */
-static int parse_program(Parser *parser) {
-    printf("Parsing Program\n");
-    return parse_statements(parser);
+static ParseTreeNode* parse_program(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_PROGRAM, NULL);
+    ParseTreeNode *child = parse_statements(parser);
+    
+    if (child) {
+        ast_add_child(node, child);
+    }
+    
+    return node;
 }
 
 /* Statements → Statement Statements | ε */
-static int parse_statements(Parser *parser) {
-    printf("Parsing Statements\n");
+static ParseTreeNode* parse_statements(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_STATEMENTS, NULL);
     
     /* Check if we can parse a statement */
     if (parser->current_token.type == TOK_KEYWORD_INT ||
@@ -180,218 +154,369 @@ static int parse_statements(Parser *parser) {
         parser->current_token.type == TOK_KEYWORD_WHILE ||
         parser->current_token.type == TOK_KEYWORD_FOR) {
         
-        if (!parse_statement(parser)) return 0;
-        if (!parse_statements(parser)) return 0;
+        ParseTreeNode *stmt = parse_statement(parser);
+        if (stmt) {
+            ast_add_child(node, stmt);
+            ParseTreeNode *rest = parse_statements(parser);
+            if (rest && rest->child_count > 0) {
+                ast_add_child(node, rest);
+            } else {
+                ast_free_tree(rest);
+            }
+        }
+    } else {
+        /* ε production */
+        ast_add_child(node, ast_create_node(NODE_EPSILON, NULL));
     }
-    /* ε production - just return success */
-    return 1;
+    
+    return node;
 }
 
 /* Statement → Declaration | Assignment | IfStatement | WhileStatement | ForStatement */
-static int parse_statement(Parser *parser) {
-    printf("Parsing Statement\n");
+static ParseTreeNode* parse_statement(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_STATEMENT, NULL);
+    ParseTreeNode *child = NULL;
     
     if (parser->current_token.type == TOK_KEYWORD_INT ||
         parser->current_token.type == TOK_KEYWORD_CHAR) {
-        return parse_declaration(parser);
+        child = parse_declaration(parser);
     } else if (parser->current_token.type == TOK_IDENTIFIER) {
-        return parse_assignment(parser);
+        child = parse_assignment(parser);
     } else if (parser->current_token.type == TOK_KEYWORD_IF) {
-        return parse_if_statement(parser);
+        child = parse_if_statement(parser);
     } else if (parser->current_token.type == TOK_KEYWORD_WHILE) {
-        return parse_while_statement(parser);
+        child = parse_while_statement(parser);
     } else if (parser->current_token.type == TOK_KEYWORD_FOR) {
-        return parse_for_statement(parser);
+        child = parse_for_statement(parser);
+    } else {
+        parser_print_error("Invalid statement");
+        ast_free_tree(node);
+        return NULL;
     }
     
-    parser_print_error("Invalid statement");
-    return 0;
+    if (child) {
+        ast_add_child(node, child);
+    }
+    
+    return node;
 }
 
 /* Declaration → int IDENTIFIER | char IDENTIFIER */
-static int parse_declaration(Parser *parser) {
-    printf("Parsing Declaration\n");
+static ParseTreeNode* parse_declaration(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_DECLARATION, NULL);
     
     if (parser->current_token.type == TOK_KEYWORD_INT) {
-        printf("  TYPE: int\n");
+        ast_add_child(node, ast_create_node(NODE_KEYWORD, "int"));
         lexer_read_token(parser);
     } else if (parser->current_token.type == TOK_KEYWORD_CHAR) {
-        printf("  TYPE: char\n");
+        ast_add_child(node, ast_create_node(NODE_KEYWORD, "char"));
         lexer_read_token(parser);
     } else {
         parser_print_error("Expected 'int' or 'char' in declaration");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
     if (parser->current_token.type != TOK_IDENTIFIER) {
         parser_print_error("Expected identifier in declaration");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
-    printf("  IDENTIFIER: %s\n", parser->current_token.value);
+    ast_add_child(node, ast_create_node(NODE_IDENTIFIER, parser->current_token.value));
     lexer_read_token(parser);
-    return 1;
+    
+    return node;
 }
 
 /* Assignment → IDENTIFIER = Expression */
-static int parse_assignment(Parser *parser) {
-    printf("Parsing Assignment\n");
+static ParseTreeNode* parse_assignment(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_ASSIGNMENT, NULL);
     
     if (parser->current_token.type != TOK_IDENTIFIER) {
         parser_print_error("Expected identifier in assignment");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
-    printf("  IDENTIFIER: %s\n", parser->current_token.value);
+    ast_add_child(node, ast_create_node(NODE_IDENTIFIER, parser->current_token.value));
     lexer_read_token(parser);
     
     if (parser->current_token.type != TOK_ASSIGN) {
         parser_print_error("Expected '=' in assignment");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
-    printf("  OPERATOR: =\n");
+    ast_add_child(node, ast_create_node(NODE_OPERATOR, "="));
     lexer_read_token(parser);
     
-    return parse_expression(parser);
+    ParseTreeNode *expr = parse_expression(parser);
+    if (expr) {
+        ast_add_child(node, expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* IfStatement → if Expression Statement */
-static int parse_if_statement(Parser *parser) {
-    printf("Parsing IfStatement\n");
+static ParseTreeNode* parse_if_statement(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_IF_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_IF) {
         parser_print_error("Expected 'if'");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
+    ast_add_child(node, ast_create_node(NODE_KEYWORD, "if"));
     lexer_read_token(parser);
     
-    if (!parse_expression(parser)) return 0;
-    if (!parse_statement(parser)) return 0;
+    ParseTreeNode *expr = parse_expression(parser);
+    if (expr) {
+        ast_add_child(node, expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
     
-    return 1;
+    ParseTreeNode *stmt = parse_statement(parser);
+    if (stmt) {
+        ast_add_child(node, stmt);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* WhileStatement → while Expression Statement */
-static int parse_while_statement(Parser *parser) {
-    printf("Parsing WhileStatement\n");
+static ParseTreeNode* parse_while_statement(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_WHILE_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_WHILE) {
         parser_print_error("Expected 'while'");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
+    ast_add_child(node, ast_create_node(NODE_KEYWORD, "while"));
     lexer_read_token(parser);
     
-    if (!parse_expression(parser)) return 0;
-    if (!parse_statement(parser)) return 0;
+    ParseTreeNode *expr = parse_expression(parser);
+    if (expr) {
+        ast_add_child(node, expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
     
-    return 1;
+    ParseTreeNode *stmt = parse_statement(parser);
+    if (stmt) {
+        ast_add_child(node, stmt);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* ForStatement → for Assignment Statement */
-static int parse_for_statement(Parser *parser) {
-    printf("Parsing ForStatement\n");
+static ParseTreeNode* parse_for_statement(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_FOR_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_FOR) {
         parser_print_error("Expected 'for'");
-        return 0;
+        ast_free_tree(node);
+        return NULL;
     }
     
+    ast_add_child(node, ast_create_node(NODE_KEYWORD, "for"));
     lexer_read_token(parser);
     
-    if (!parse_assignment(parser)) return 0;
-    if (!parse_statement(parser)) return 0;
+    ParseTreeNode *assign = parse_assignment(parser);
+    if (assign) {
+        ast_add_child(node, assign);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
     
-    return 1;
+    ParseTreeNode *stmt = parse_statement(parser);
+    if (stmt) {
+        ast_add_child(node, stmt);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* Expression → Term AddExpr */
-static int parse_expression(Parser *parser) {
-    printf("Parsing Expression\n");
+static ParseTreeNode* parse_expression(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_EXPRESSION, NULL);
     
-    if (!parse_term(parser)) return 0;
-    if (!parse_add_expr(parser)) return 0;
+    ParseTreeNode *term = parse_term(parser);
+    if (term) {
+        ast_add_child(node, term);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
     
-    return 1;
+    ParseTreeNode *add_expr = parse_add_expr(parser);
+    if (add_expr) {
+        ast_add_child(node, add_expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* AddExpr → + Term AddExpr | ε */
-static int parse_add_expr(Parser *parser) {
-    printf("Parsing AddExpr\n");
+static ParseTreeNode* parse_add_expr(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_TERM, NULL);
     
     if (parser->current_token.type == TOK_PLUS) {
-        printf("  OPERATOR: +\n");
+        ast_add_child(node, ast_create_node(NODE_OPERATOR, "+"));
         lexer_read_token(parser);
-        if (!parse_term(parser)) return 0;
-        if (!parse_add_expr(parser)) return 0;
+        
+        ParseTreeNode *term = parse_term(parser);
+        if (term) {
+            ast_add_child(node, term);
+        } else {
+            ast_free_tree(node);
+            return NULL;
+        }
+        
+        ParseTreeNode *rest = parse_add_expr(parser);
+        if (rest && rest->child_count > 0) {
+            ast_add_child(node, rest);
+        } else {
+            ast_free_tree(rest);
+        }
+    } else {
+        /* ε production */
+        ast_add_child(node, ast_create_node(NODE_EPSILON, NULL));
     }
-    /* ε production */
-    return 1;
+    
+    return node;
 }
 
 /* Term → Factor MulExpr */
-static int parse_term(Parser *parser) {
-    printf("Parsing Term\n");
+static ParseTreeNode* parse_term(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_TERM, NULL);
     
-    if (!parse_factor(parser)) return 0;
-    if (!parse_mul_expr(parser)) return 0;
+    ParseTreeNode *factor = parse_factor(parser);
+    if (factor) {
+        ast_add_child(node, factor);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
     
-    return 1;
+    ParseTreeNode *mul_expr = parse_mul_expr(parser);
+    if (mul_expr) {
+        ast_add_child(node, mul_expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
 }
 
 /* MulExpr → * Factor MulExpr | % Factor MulExpr | ε */
-static int parse_mul_expr(Parser *parser) {
-    printf("Parsing MulExpr\n");
+static ParseTreeNode* parse_mul_expr(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_TERM, NULL);
     
     if (parser->current_token.type == TOK_MUL) {
-        printf("  OPERATOR: *\n");
+        ast_add_child(node, ast_create_node(NODE_OPERATOR, "*"));
         lexer_read_token(parser);
-        if (!parse_factor(parser)) return 0;
-        if (!parse_mul_expr(parser)) return 0;
+        
+        ParseTreeNode *factor = parse_factor(parser);
+        if (factor) {
+            ast_add_child(node, factor);
+        } else {
+            ast_free_tree(node);
+            return NULL;
+        }
+        
+        ParseTreeNode *rest = parse_mul_expr(parser);
+        if (rest && rest->child_count > 0) {
+            ast_add_child(node, rest);
+        } else {
+            ast_free_tree(rest);
+        }
     } else if (parser->current_token.type == TOK_MOD) {
-        printf("  OPERATOR: %%\n");
+        ast_add_child(node, ast_create_node(NODE_OPERATOR, "%"));
         lexer_read_token(parser);
-        if (!parse_factor(parser)) return 0;
-        if (!parse_mul_expr(parser)) return 0;
+        
+        ParseTreeNode *factor = parse_factor(parser);
+        if (factor) {
+            ast_add_child(node, factor);
+        } else {
+            ast_free_tree(node);
+            return NULL;
+        }
+        
+        ParseTreeNode *rest = parse_mul_expr(parser);
+        if (rest && rest->child_count > 0) {
+            ast_add_child(node, rest);
+        } else {
+            ast_free_tree(rest);
+        }
+    } else {
+        /* ε production */
+        ast_add_child(node, ast_create_node(NODE_EPSILON, NULL));
     }
-    /* ε production */
-    return 1;
+    
+    return node;
 }
 
 /* Factor → IDENTIFIER | NUMBER */
-static int parse_factor(Parser *parser) {
-    printf("Parsing Factor\n");
+static ParseTreeNode* parse_factor(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_FACTOR, NULL);
     
     if (parser->current_token.type == TOK_IDENTIFIER) {
-        printf("  IDENTIFIER: %s\n", parser->current_token.value);
+        ast_add_child(node, ast_create_node(NODE_IDENTIFIER, parser->current_token.value));
         lexer_read_token(parser);
-        return 1;
+        return node;
     } else if (parser->current_token.type == TOK_NUMBER) {
-        printf("  NUMBER: %s\n", parser->current_token.value);
+        ast_add_child(node, ast_create_node(NODE_NUMBER, parser->current_token.value));
         lexer_read_token(parser);
-        return 1;
+        return node;
     }
     
     parser_print_error("Expected identifier or number in factor");
-    return 0;
+    ast_free_tree(node);
+    return NULL;
 }
 
-/* Main parsing function */
-int parser_parse(Parser *parser) {
+/* Main parsing function - returns parse tree root */
+ParseTreeNode* parser_parse(Parser *parser) {
     printf("=== LL(1) Parser Starting ===\n\n");
     
-    if (parse_program(parser)) {
-        if (parser->current_token.type == TOK_EOF) {
-            printf("\n=== Parsing Successful ===\n");
-            return 1;
-        } else {
-            printf("\nERROR: Expected EOF, got %s\n", parser->current_token.value);
-            return 0;
-        }
+    ParseTreeNode *root = parse_program(parser);
+    
+    if (root && parser->current_token.type == TOK_EOF) {
+        printf("\n=== Parsing Successful ===\n");
+        return root;
+    }
+    
+    if (root) {
+        printf("\nERROR: Expected EOF, got %s\n", parser->current_token.value);
+        ast_free_tree(root);
     }
     
     printf("\n=== Parsing Failed ===\n");
-    return 0;
+    return NULL;
 }

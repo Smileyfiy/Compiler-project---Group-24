@@ -1,10 +1,25 @@
-# LL(1) Parser for Mini-Grammar
+# LL(1) Parser for Mini-Grammar with Parse Tree Generation
 
-This is a **table-driven LL(1) Parser** implementing recursive descent parsing for the mini-language tokens produced by the lexer.
+## Overview
+
+This is a **recursive-descent LL(1) Parser** that generates **Abstract Syntax Trees (parse trees)** for the mini-language tokens produced by the lexer. The parser implements the decision taken by Group 24 to use a **Recursive-Descent Predictive Parser** approach.
+
+## Implementation Approach Selected
+
+**Decision: Recursive-Descent Predictive LL(1) Parser**
+
+**Rationale:**
+- LL(1) properties ensure deterministic parsing with single lookahead
+- Recursive descent is intuitive, easy to debug, and maintain
+- Suitable for the mini-grammar complexity (non-ambiguous)
+- Direct integration with lexer tokens without intermediate buffering
+- Clear, detailed error reporting at grammar rule level
+- Natural parse tree generation through function call stack
+- Easier to explain and demonstrate for live presentation
+
+---
 
 ## Grammar Definition
-
-The parser uses the following inferred grammar optimized for LL(1) parsing:
 
 ```
 Program     → Statements
@@ -24,150 +39,292 @@ MulExpr     → * Factor MulExpr | % Factor MulExpr | ε
 Factor      → IDENTIFIER | NUMBER
 ```
 
-## Grammar Analysis
+### Grammar Analysis
 
-### FIRST Sets
+#### FIRST Sets
 | Non-terminal | FIRST |
 |---|---|
 | Program | {int, char, IDENTIFIER, if, while, for} |
 | Statements | {int, char, IDENTIFIER, if, while, for, ε} |
 | Statement | {int, char, IDENTIFIER, if, while, for} |
-| Declaration | {int, char} |
-| Assignment | {IDENTIFIER} |
-| IfStatement | {if} |
-| WhileStatement | {while} |
-| ForStatement | {for} |
 | Expression | {IDENTIFIER, NUMBER} |
-| AddExpr | {+, ε} |
 | Term | {IDENTIFIER, NUMBER} |
-| MulExpr | {*, %, ε} |
 | Factor | {IDENTIFIER, NUMBER} |
 
-### FOLLOW Sets
+#### FOLLOW Sets
 | Non-terminal | FOLLOW |
 |---|---|
 | Program | {EOF} |
 | Statements | {EOF} |
 | Statement | {int, char, IDENTIFIER, if, while, for, EOF} |
-| Declaration | {int, char, IDENTIFIER, if, while, for, EOF} |
-| Assignment | {int, char, IDENTIFIER, if, while, for, EOF} |
-| IfStatement | {int, char, IDENTIFIER, if, while, for, EOF} |
-| WhileStatement | {int, char, IDENTIFIER, if, while, for, EOF} |
-| ForStatement | {int, char, IDENTIFIER, if, while, for, EOF} |
-| Expression | {int, char, IDENTIFIER, if, while, for, EOF} |
-| AddExpr | {int, char, IDENTIFIER, if, while, for, EOF} |
-| Term | {+, int, char, IDENTIFIER, if, while, for, EOF} |
-| MulExpr | {+, int, char, IDENTIFIER, if, while, for, EOF} |
-| Factor | {*, %, +, int, char, IDENTIFIER, if, while, for, EOF} |
+| Expression | {keywords, identifiers, EOF} |
 
-## LL(1) Property
+### LL(1) Property Verification
 
-This grammar is LL(1) because for each non-terminal with multiple productions, the FIRST sets of the alternatives are disjoint, ensuring deterministic parsing with a single lookahead token.
+This grammar is **LL(1)** because:
+- For each non-terminal with multiple productions, FIRST sets are **disjoint**
+- No conflicts in parsing decisions
+- Single lookahead token suffices for deterministic parsing
 
-## Implementation Approach
+---
 
-The parser is implemented using **recursive descent** parsing with each grammar rule mapped to a function. While the current implementation uses a procedural approach rather than an explicit parsing table, the design ensures LL(1) properties through:
+## Key Features
 
-1. **Deterministic choices**: Each parsing function makes its decision based on the current token's type
-2. **No backtracking**: Once a production is selected, it commits to that path
-3. **Predictive parsing**: FIRST sets guide the parsing decisions
+✅ **Parse Tree Generation**: Builds Abstract Syntax Tree (AST) for successful parses  
+✅ **Token Integration**: Reads tokens directly from input file  
+✅ **Detailed Error Messages**: Clear error reporting for parse failures  
+✅ **Tree Visualization**: Indented parse tree output showing grammar rules  
+✅ **Node Types**: Semantic information preserved in AST nodes  
+✅ **Memory Management**: Proper allocation and deallocation of tree nodes  
 
-## Files
+---
 
-- **parser.h**: Header with token definitions and data structures
-- **parser.c**: Core parser implementation with recursive descent functions
-- **main.c**: Driver program that reads from `program.txt` and parses
-- **makefile**: Build configuration
+## File Structure
+
+```
+Parser-G24/
+├── parser.h              # Token types and parser interface
+├── parser.c              # Recursive descent parser implementation
+├── parse_tree.h          # AST node data structures
+├── parse_tree.c          # Parse tree manipulation functions
+├── main.c                # Driver program
+├── makefile              # Build configuration
+├── readme.md             # This file
+├── program.txt           # Input file (parsed program)
+├── run_samples.sh        # Sample test suite
+└── samples/
+    ├── sample1_declarations.txt
+    ├── sample2_expressions.txt
+    ├── sample3_if_statement.txt
+    ├── sample4_while_loop.txt
+    ├── sample5_for_loop.txt
+    └── sample6_complex.txt
+```
+
+---
 
 ## Compilation
 
 ```bash
-make
+cd Parser-G24
+make          # Compile all sources
+make clean    # Remove generated files
 ```
+
+**Output**: Executable `parser` file
+
+---
 
 ## Running the Parser
 
+### Basic Usage
 ```bash
-make run
+./parser
+```
+Parses `program.txt` and outputs parse tree
+
+### Run All Sample Tests
+```bash
+./run_samples.sh
+```
+Executes parser on all sample test cases showing input and output
+
+### With Specific Test File
+```bash
+cp samples/sample2_expressions.txt program.txt
+./parser
 ```
 
-The parser reads input from `program.txt` in the Parser-G24 directory.
+---
 
-## Example Input
+## Parse Tree Output Example
 
+### Input Program
 ```
-int count
-count = 5 + 3
-while count
-  count = count * 2
-```
-
-## Example Output
-
-```
-=== LL(1) Parser Starting ===
-
-Parsing Program
-Parsing Statements
-Parsing Statement
-Parsing Declaration
-  TYPE: int
-  IDENTIFIER: count
-Parsing Statements
-Parsing Statement
-Parsing Assignment
-  IDENTIFIER: count
-  OPERATOR: =
-Parsing Expression
-Parsing Term
-Parsing Factor
-  NUMBER: 5
-Parsing MulExpr
-Parsing AddExpr
-  OPERATOR: +
-Parsing Term
-Parsing Factor
-  NUMBER: 3
-Parsing MulExpr
-Parsing AddExpr
-...
-
-=== Parsing Successful ===
+int x
+x = 5 + 3
 ```
 
-## Parsing Strategy
+### Parse Tree Output
+```
+=== PARSE TREE ===
 
-### Program Analysis Flow
+├─ Program
+  ├─ Statements
+    ├─ Statement
+      ├─ Declaration
+        ├─ Keyword : "int"
+        ├─ Identifier : "x"
+    ├─ Statements
+      ├─ Statement
+        ├─ Assignment
+          ├─ Identifier : "x"
+          ├─ Operator : "="
+          ├─ Expression
+            ├─ Term
+              ├─ Factor
+                ├─ Number : "5"
+          ... [continues for right operand]
+      ├─ Statements
+        ├─ ε
+```
 
-1. **Lexical Analysis**: The parser reads tokens from the input file character by character
-2. **Syntax Analysis**: Using the grammar rules and FIRST/FOLLOW sets, the parser recursively processes tokens
-3. **Parsing Tree Construction**: Each function call represents a level in the parse tree
+---
 
-### Error Handling
+## AST Node Types
 
-The parser provides basic error messages for:
-- Unexpected tokens
-- Missing keywords or operators
-- Invalid syntax
+| Node Type | Description |
+|---|---|
+| NODE_PROGRAM | Root of parse tree |
+| NODE_STATEMENTS | Statement sequence |
+| NODE_STATEMENT | Single statement |
+| NODE_DECLARATION | Variable declaration |
+| NODE_ASSIGNMENT | Variable assignment |
+| NODE_IF_STATEMENT | If control structure |
+| NODE_WHILE_STATEMENT | While control structure |
+| NODE_FOR_STATEMENT | For loop structure |
+| NODE_EXPRESSION | Arithmetic expression |
+| NODE_TERM | Multiplicative subexpression |
+| NODE_FACTOR | Atomic value |
+| NODE_OPERATOR | Binary operator (+, *, %, =) |
+| NODE_IDENTIFIER | Variable name |
+| NODE_NUMBER | Numeric literal |
+| NODE_KEYWORD | Language keyword |
+| NODE_EPSILON | Empty production |
 
-## Production Rules Summary
+---
 
-| # | Rule | Type |
+## Error Handling
+
+The parser detects and reports:
+- **Syntax Errors**: Missing or unexpected tokens
+- **Type Errors**: Wrong token type in context
+- **Unexpected EOF**: Incomplete programs
+
+**Example Error Message**:
+```
+PARSE ERROR: Expected identifier in declaration
+ERROR: Expected EOF, got identifier
+```
+
+---
+
+## Testing
+
+### Sample Test Cases
+1. **Declarations**: Simple int/char variable declarations
+2. **Expressions**: Arithmetic expressions with operators  
+3. **If Statements**: Conditional execution
+4. **While Loops**: Iterative execution
+5. **For Loops**: Counter-based iteration
+6. **Complex**: Combined features with nesting
+
+**Run Tests**: Execute `./run_samples.sh` to test all cases
+
+---
+
+## Parsing Algorithm
+
+### Recursive Descent Steps
+
+1. **Initialization**: Read first token from input
+2. **Grammar Rule Processing**:
+   - Each function implements one grammar rule
+   - FIRST set determines which production to use
+   - Consume matching tokens and recurse
+3. **Node Creation**: Build AST node for each rule matched
+4. **Tree Linking**: Connect parent and child nodes
+5. **Validation**: Check for EOF at end of parse
+
+### For Each Production:
+```
+parse_rule:
+1. Create AST node for this rule
+2. Check lookahead token (FIRST set)
+3. Recursively parse child rules
+4. Add child nodes to parent
+5. Return constructed subtree
+```
+
+---
+
+## Workplan Adherence
+
+This implementation follows the project **workplan** with:
+
+✅ **Task Definition**: All parsing modules documented  
+✅ **Effort Estimation**: 14.5 days distributed across 3 weeks  
+✅ **Responsibility Assignment**: Clear task allocation to team members  
+✅ **Implementation**: Recursive descent with full grammar coverage  
+✅ **Document Deliverables**: Source code, token traces, parse trees  
+✅ **Demo Preparation**: Sample programs ready for April 24 presentation  
+
+---
+
+## Live Demo Preparation
+
+### Demo Flow
+1. **Input**: Show mini-language source code
+2. **Lexer Output**: Display tokenized output
+3. **Parse Stage**: Run parser with tokens
+4. **Parse Tree**: Show AST visualization
+5. **Explanation**: Team members explain components
+
+### Demo Materials Ready
+- ✅ Sample programs in `samples/` directory
+- ✅ Token trace examples
+- ✅ Parse tree outputs for each test case
+- ✅ Error handling demonstrations
+
+---
+
+## Member Roles (From Workplan)
+
+| Name | Role | Responsibility |
 |---|---|---|
-| 0 | Program → Statements | Start |
-| 1 | Statements → Statement Statements | Recursive |
-| 2 | Statements → ε | Base |
-| 3-7 | Statement alternatives | Disambiguation |
-| 8-9 | Declaration (int/char) | Terminal |
-| 10 | Assignment | Terminal |
-| 11-13 | Control Structures | Terminal |
-| 14 | Expression → Term AddExpr | Binary |
-| 15 | AddExpr → + Term AddExpr | Right-recursive |
-| 16 | AddExpr → ε | Base |
-| 17 | Term → Factor MulExpr | Binary |
-| 18-19 | MulExpr (*,%) | Right-recursive |
-| 20 | MulExpr → ε | Base |
-| 21-22 | Factor terminals | Terminal |
+| JOHN OTIENO | Token Integration & Error Handling | Lexer interface, error messages |
+| MICHAEL MUTETI | Parser Core & Testing | Parser initialization, test cases |
+| ABBA BIKO WERE | Parsing Functions | Statement and expression parsers |
+| MARK WAFULA | Parse Tree & Output | AST structures, tree visualization |
+
+---
+
+## References
+
+- **Grammar**: Mini-grammar for simple programming language
+- **Implementation**: Recursive descent parsing
+- **AST**: Standard abstract syntax tree representation
+- **Standards**: C99/C11 with POSIX functions
+
+---
+
+## Building & Running
+
+### Quick Start
+```bash
+cd Parser-G24
+make
+echo "int x\nx = 10" > program.txt
+./parser
+```
+
+### Test Suite
+```bash
+./run_samples.sh | tee test_results.log
+```
+
+### Cleanup
+```bash
+make clean
+```
+
+---
+
+**Last Updated**: April 15, 2026  
+**Status**: ✅ Parse Tree Generation Implemented  
+**Next**: Integration test with lexer output
+
+---
 
 ## Authors
 
@@ -177,3 +334,4 @@ Group 24 – Compiler Construction
      MICHAEL MUTETI - SCS3/147532/2024
      ABBA BIKO WERE - SCS3/146750/2023
      MARK WAFULA - SCS3/146670/2023
+

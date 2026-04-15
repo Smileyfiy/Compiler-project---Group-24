@@ -1,9 +1,14 @@
+/*
+LL(1) Parser Header
+*/
+
 #ifndef PARSER_H
 #define PARSER_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "parse_tree.h"
 
 /* Token types */
 typedef enum {
@@ -71,7 +76,7 @@ typedef struct {
 Parser* parser_init(FILE *input);
 void parser_destroy(Parser *parser);
 Token parser_next_token(Parser *parser);
-int parser_parse(Parser *parser);
+ParseTreeNode* parser_parse(Parser *parser);
 void parser_print_error(const char *message);
 
 #endif
