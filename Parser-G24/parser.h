@@ -24,6 +24,8 @@ typedef enum {
     TOK_PLUS = 9,        /* + */
     TOK_MUL = 10,        /* * */
     TOK_MOD = 11,        /* % */
+    TOK_LT = 13,         /* < */
+    TOK_GT = 14,         /* > */
     TOK_ERROR = 12
 } TokenType;
 
