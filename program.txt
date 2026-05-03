@@ -2,7 +2,7 @@ int x
 int y
 x = 5
 y = 10
-if x
+if x > 3
 y = y * 2
-while i
-x = i
+while 7 < 8
+x = 1

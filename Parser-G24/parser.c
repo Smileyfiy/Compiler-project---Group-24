@@ -22,6 +22,7 @@ static ParseTreeNode* parse_if_statement(Parser *parser);
 static ParseTreeNode* parse_while_statement(Parser *parser);
 static ParseTreeNode* parse_for_statement(Parser *parser);
 static ParseTreeNode* parse_expression(Parser *parser);
+static ParseTreeNode* parse_comp_expr(Parser *parser);
 static ParseTreeNode* parse_add_expr(Parser *parser);
 static ParseTreeNode* parse_term(Parser *parser);
 static ParseTreeNode* parse_mul_expr(Parser *parser);
@@ -106,6 +107,14 @@ static void lexer_read_token(Parser *parser) {
         case '%':
             parser->current_token.type = TOK_MOD;
             strcpy(parser->current_token.value, "%");
+            break;
+        case '<':
+            parser->current_token.type = TOK_LT;
+            strcpy(parser->current_token.value, "<");
+            break;
+        case '>':
+            parser->current_token.type = TOK_GT;
+            strcpy(parser->current_token.value, ">");
             break;
         default:
             parser->current_token.type = TOK_ERROR;
@@ -364,10 +373,26 @@ static ParseTreeNode* parse_for_statement(Parser *parser) {
     return node;
 }
 
-/* Expression → Term AddExpr */
+/* Expression → CompExpr */
 static ParseTreeNode* parse_expression(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_EXPRESSION, NULL);
     
+    ParseTreeNode *comp_expr = parse_comp_expr(parser);
+    if (comp_expr) {
+        ast_add_child(node, comp_expr);
+    } else {
+        ast_free_tree(node);
+        return NULL;
+    }
+    
+    return node;
+}
+
+/* CompExpr → AddExpr CompOp CompExpr | AddExpr */
+static ParseTreeNode* parse_comp_expr(Parser *parser) {
+    ParseTreeNode *node = ast_create_node(NODE_EXPRESSION, NULL);
+    
+    /* First parse the term and addition expression */
     ParseTreeNode *term = parse_term(parser);
     if (term) {
         ast_add_child(node, term);
@@ -377,11 +402,33 @@ static ParseTreeNode* parse_expression(Parser *parser) {
     }
     
     ParseTreeNode *add_expr = parse_add_expr(parser);
-    if (add_expr) {
+    if (add_expr && add_expr->child_count > 0) {
         ast_add_child(node, add_expr);
     } else {
-        ast_free_tree(node);
-        return NULL;
+        ast_free_tree(add_expr);
+    }
+    
+    /* Now check for comparison operators */
+    if (parser->current_token.type == TOK_LT || parser->current_token.type == TOK_GT) {
+        ParseTreeNode *comp_node = ast_create_node(NODE_EXPRESSION, NULL);
+        ast_add_child(comp_node, node);
+        
+        if (parser->current_token.type == TOK_LT) {
+            ast_add_child(comp_node, ast_create_node(NODE_OPERATOR, "<"));
+        } else {
+            ast_add_child(comp_node, ast_create_node(NODE_OPERATOR, ">"));
+        }
+        lexer_read_token(parser);
+        
+        ParseTreeNode *right = parse_comp_expr(parser);
+        if (right) {
+            ast_add_child(comp_node, right);
+        } else {
+            ast_free_tree(comp_node);
+            return NULL;
+        }
+        
+        return comp_node;
     }
     
     return node;
