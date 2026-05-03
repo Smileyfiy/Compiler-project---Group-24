@@ -2,14 +2,7 @@ int x
 int y
 x = 5
 y = 10
-<<<<<<< HEAD
-if x
-y = y * 2
-while i
-x = i
-=======
 if x > 3
 y = y * 2
 while 7 < 8
 x = 1
->>>>>>> operators
