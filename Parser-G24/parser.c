@@ -141,7 +141,9 @@ void parser_destroy(Parser *parser) {
 
 /* Print error message with line number */
 void parser_print_error(Parser *parser, const char *message) {
-    fprintf(stderr, "PARSE ERROR [Line %d]: %s\n", parser->line_number, message);
+    if (parser->error_count < 100) {
+        sprintf(parser->error_messages[parser->error_count], "[Line %d]: %s", parser->line_number, message);
+    }
     parser->error_count++;
 }
 
@@ -167,7 +169,8 @@ static ParseTreeNode* parse_statements(Parser *parser) {
         parser->current_token.type == TOK_IDENTIFIER ||
         parser->current_token.type == TOK_KEYWORD_IF ||
         parser->current_token.type == TOK_KEYWORD_WHILE ||
-        parser->current_token.type == TOK_KEYWORD_FOR) {
+        parser->current_token.type == TOK_KEYWORD_FOR ||
+        parser->current_token.type == TOK_ERROR) {
         
         ParseTreeNode *stmt = parse_statement(parser);
         if (stmt) {
@@ -203,6 +206,13 @@ static ParseTreeNode* parse_statement(Parser *parser) {
         child = parse_while_statement(parser);
     } else if (parser->current_token.type == TOK_KEYWORD_FOR) {
         child = parse_for_statement(parser);
+    } else if (parser->current_token.type == TOK_ERROR) {
+        /* Handle error token in statement context */
+        char error_msg[150];
+        sprintf(error_msg, "Invalid character '%s'", parser->current_token.value);
+        parser_print_error(parser, error_msg);
+        child = ast_create_node(NODE_ERROR, error_msg);
+        lexer_read_token(parser);
     } else {
         parser_print_error(parser, "Invalid statement");
         ast_free_tree(node);
@@ -547,6 +557,23 @@ static ParseTreeNode* parse_factor(Parser *parser) {
         ast_add_child(node, ast_create_node(NODE_NUMBER, parser->current_token.value));
         lexer_read_token(parser);
         return node;
+    } else if (parser->current_token.type == TOK_ERROR) {
+        /* Handle error token - add to error list and skip */
+        char error_msg[150];
+        sprintf(error_msg, "Invalid character '%s'", parser->current_token.value);
+        parser_print_error(parser, error_msg);
+        
+        /* Create error node and add to parse tree */
+        ParseTreeNode *error_node = ast_create_node(NODE_ERROR, error_msg);
+        ast_add_child(node, error_node);
+        
+        lexer_read_token(parser);
+        /* Try to parse the next factor */
+        ParseTreeNode *next = parse_factor(parser);
+        if (next) {
+            ast_add_child(node, next);
+        }
+        return node;
     }
     
     parser_print_error(parser, "Expected identifier or number in factor");
@@ -560,16 +587,18 @@ ParseTreeNode* parser_parse(Parser *parser) {
     
     ParseTreeNode *root = parse_program(parser);
     
-    if (root && parser->current_token.type == TOK_EOF) {
-        printf("\n=== Parsing Successful ===\n");
-        return root;
+    if (!root) {
+        root = ast_create_node(NODE_PROGRAM, NULL);
     }
     
-    if (root) {
-        printf("\nERROR: Expected EOF, got %s\n", parser->current_token.value);
-        ast_free_tree(root);
+    /* Add errors to tree if any occurred */
+    if (parser->error_count > 0) {
+        ParseTreeNode *error_node = ast_create_node(NODE_ERROR, "Parsing Errors");
+        for (int i = 0; i < parser->error_count; i++) {
+            ast_add_child(error_node, ast_create_node(NODE_ERROR, parser->error_messages[i]));
+        }
+        ast_add_child(root, error_node);
     }
     
-    printf("\n=== Parsing Failed ===\n");
-    return NULL;
+    return root;
 }

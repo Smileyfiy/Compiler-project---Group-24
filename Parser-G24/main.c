@@ -28,6 +28,15 @@ int main(void) {
         ast_print_tree(parse_tree, 0);
         printf("\n");
         
+        /* Print error messages if any */
+        if (parser->error_count > 0) {
+            printf("\n=== ERROR MESSAGES ===\n");
+            for (int i = 0; i < parser->error_count; i++) {
+                printf("PARSE ERROR %s\n", parser->error_messages[i]);
+            }
+            printf("\n");
+        }
+        
         /* Free the parse tree */
         ast_free_tree(parse_tree);
     }
