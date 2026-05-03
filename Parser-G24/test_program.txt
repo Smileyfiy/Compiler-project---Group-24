@@ -1,0 +1,9 @@
+int x
+int y
+x = 5
+y = 10
+if x
+y = y * 2
+while y
+y = y * 3
+z = 100

@@ -33,8 +33,12 @@ static void lexer_read_token(Parser *parser) {
     char ch;
     int i = 0;
     
-    /* Skip whitespace */
-    while ((ch = fgetc(parser->input_file)) != EOF && isspace(ch));
+    /* Skip whitespace and track newlines */
+    while ((ch = fgetc(parser->input_file)) != EOF && isspace(ch)) {
+        if (ch == '\n') {
+            parser->line_number++;
+        }
+    }
     
     if (ch == EOF) {
         parser->current_token.type = TOK_EOF;
@@ -123,6 +127,7 @@ Parser* parser_init(FILE *input) {
     Parser *parser = (Parser *)malloc(sizeof(Parser));
     parser->input_file = input;
     parser->error_count = 0;
+    parser->line_number = 1;
     lexer_read_token(parser);
     return parser;
 }
@@ -134,9 +139,10 @@ void parser_destroy(Parser *parser) {
     }
 }
 
-/* Print error message */
-void parser_print_error(const char *message) {
-    fprintf(stderr, "PARSE ERROR: %s\n", message);
+/* Print error message with line number */
+void parser_print_error(Parser *parser, const char *message) {
+    fprintf(stderr, "PARSE ERROR [Line %d]: %s\n", parser->line_number, message);
+    parser->error_count++;
 }
 
 /* Recursive descent parser for LL(1) */
@@ -198,7 +204,7 @@ static ParseTreeNode* parse_statement(Parser *parser) {
     } else if (parser->current_token.type == TOK_KEYWORD_FOR) {
         child = parse_for_statement(parser);
     } else {
-        parser_print_error("Invalid statement");
+        parser_print_error(parser, "Invalid statement");
         ast_free_tree(node);
         return NULL;
     }
@@ -221,13 +227,13 @@ static ParseTreeNode* parse_declaration(Parser *parser) {
         ast_add_child(node, ast_create_node(NODE_KEYWORD, "char"));
         lexer_read_token(parser);
     } else {
-        parser_print_error("Expected 'int' or 'char' in declaration");
+        parser_print_error(parser, "Expected 'int' or 'char' in declaration");
         ast_free_tree(node);
         return NULL;
     }
     
     if (parser->current_token.type != TOK_IDENTIFIER) {
-        parser_print_error("Expected identifier in declaration");
+        parser_print_error(parser, "Expected identifier in declaration");
         ast_free_tree(node);
         return NULL;
     }
@@ -243,7 +249,7 @@ static ParseTreeNode* parse_assignment(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_ASSIGNMENT, NULL);
     
     if (parser->current_token.type != TOK_IDENTIFIER) {
-        parser_print_error("Expected identifier in assignment");
+        parser_print_error(parser, "Expected identifier in assignment");
         ast_free_tree(node);
         return NULL;
     }
@@ -252,7 +258,7 @@ static ParseTreeNode* parse_assignment(Parser *parser) {
     lexer_read_token(parser);
     
     if (parser->current_token.type != TOK_ASSIGN) {
-        parser_print_error("Expected '=' in assignment");
+        parser_print_error(parser, "Expected '=' in assignment");
         ast_free_tree(node);
         return NULL;
     }
@@ -276,7 +282,7 @@ static ParseTreeNode* parse_if_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_IF_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_IF) {
-        parser_print_error("Expected 'if'");
+        parser_print_error(parser, "Expected 'if'");
         ast_free_tree(node);
         return NULL;
     }
@@ -308,7 +314,7 @@ static ParseTreeNode* parse_while_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_WHILE_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_WHILE) {
-        parser_print_error("Expected 'while'");
+        parser_print_error(parser, "Expected 'while'");
         ast_free_tree(node);
         return NULL;
     }
@@ -340,7 +346,7 @@ static ParseTreeNode* parse_for_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_FOR_STATEMENT, NULL);
     
     if (parser->current_token.type != TOK_KEYWORD_FOR) {
-        parser_print_error("Expected 'for'");
+        parser_print_error(parser, "Expected 'for'");
         ast_free_tree(node);
         return NULL;
     }
@@ -543,7 +549,7 @@ static ParseTreeNode* parse_factor(Parser *parser) {
         return node;
     }
     
-    parser_print_error("Expected identifier or number in factor");
+    parser_print_error(parser, "Expected identifier or number in factor");
     ast_free_tree(node);
     return NULL;
 }

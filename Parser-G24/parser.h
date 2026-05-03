@@ -72,6 +72,7 @@ typedef struct {
     Token current_token;
     FILE *input_file;
     int error_count;
+    int line_number;
 } Parser;
 
 /* Function declarations */
@@ -79,6 +80,6 @@ Parser* parser_init(FILE *input);
 void parser_destroy(Parser *parser);
 Token parser_next_token(Parser *parser);
 ParseTreeNode* parser_parse(Parser *parser);
-void parser_print_error(const char *message);
+void parser_print_error(Parser *parser, const char *message);
 
 #endif
