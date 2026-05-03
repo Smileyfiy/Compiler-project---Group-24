@@ -21,7 +21,8 @@ typedef enum {
     NODE_IDENTIFIER,
     NODE_NUMBER,
     NODE_KEYWORD,
-    NODE_EPSILON  /* For empty productions */
+    NODE_EPSILON,  /* For empty productions */
+    NODE_ERROR     /* For error nodes */
 } NodeType;
 
 /* AST Node structure */

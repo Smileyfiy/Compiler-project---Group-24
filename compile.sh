@@ -6,8 +6,6 @@
 # Shows outputs of both stages separately
 ###############################################################################
 
-set -e
-
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

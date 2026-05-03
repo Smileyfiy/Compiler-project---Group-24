@@ -36,5 +36,5 @@ int main(void) {
     parser_destroy(parser);
     fclose(input_file);
     
-    return (parse_tree != NULL) ? 0 : 1;
+    return 0;
 }

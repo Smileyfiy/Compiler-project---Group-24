@@ -59,6 +59,7 @@ char* ast_node_type_to_string(NodeType type) {
         case NODE_NUMBER: return "Number";
         case NODE_KEYWORD: return "Keyword";
         case NODE_EPSILON: return "ε";
+        case NODE_ERROR: return "ERROR";
         default: return "Unknown";
     }
 }

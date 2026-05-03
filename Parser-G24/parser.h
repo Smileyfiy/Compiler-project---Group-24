@@ -73,6 +73,7 @@ typedef struct {
     FILE *input_file;
     int error_count;
     int line_number;
+    char error_messages[100][200];  /* Store error messages */
 } Parser;
 
 /* Function declarations */
