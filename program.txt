@@ -4,4 +4,5 @@ x = 5
 y = 10
 if x
 y = y * 2
-while
+while i
+x = i
