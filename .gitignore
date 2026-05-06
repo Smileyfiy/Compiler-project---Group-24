@@ -1,6 +1,7 @@
 # GCC compiled binaries
 lexer
 parser
+icg
 *.out
 *.exe
 *.o

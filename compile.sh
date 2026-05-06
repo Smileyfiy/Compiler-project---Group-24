@@ -114,6 +114,8 @@ echo ""
 echo -e "${GREEN}STEP 4: INTERMEDIATE CODE GENERATION ${NC}"
 echo -e "${YELLOW}────────────────────────────────────────────────────────────${NC}"
 
+cp "$PROGRAM_FILE" "$ICG_DIR/program.txt"
+
 # Check if ICG is compiled
 if [ ! -f "$ICG_DIR/icg" ]; then
     echo -e "${YELLOW}Compiling ICG...${NC}"
