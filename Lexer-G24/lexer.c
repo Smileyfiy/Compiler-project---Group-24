@@ -212,7 +212,7 @@ int main(){
     
     /* Return error code if any errors found */
     if(error_count > 0){
-        fprintf(stderr, "\nLexer failed with %d error(s)\n", error_count);
+        fprintf(stderr, "\nLexer completed with %d error(s)\n", error_count);
         return 1;
     }
     

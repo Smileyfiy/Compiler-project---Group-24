@@ -2,8 +2,8 @@
 
 ###############################################################################
 # Unified Compiler Pipeline
-# Runs program.txt through Lexer-G24 then Parser-G24
-# Shows outputs of both stages separately
+# Runs program.txt through Lexer-G24, Parser-G24, then ICG-G24
+# Shows outputs of all stages separately
 ###############################################################################
 
 # Color codes for output
@@ -17,6 +17,7 @@ NC='\033[0m' # No Color
 PROGRAM_FILE="program.txt"
 LEXER_DIR="Lexer-G24"
 PARSER_DIR="Parser-G24"
+ICG_DIR="ICG-G24"
 
 # Check if program.txt exists
 if [ ! -f "$PROGRAM_FILE" ]; then
@@ -33,6 +34,11 @@ fi
 
 if [ ! -d "$PARSER_DIR" ]; then
     echo -e "${RED}Error: $PARSER_DIR directory not found${NC}"
+    exit 1
+fi
+
+if [ ! -d "$ICG_DIR" ]; then
+    echo -e "${RED}Error: $ICG_DIR directory not found${NC}"
     exit 1
 fi
 
@@ -103,8 +109,27 @@ echo ""
 echo ""
 
 # ============================================================================
-# SUMMARY
+# STEP 4: Run ICG (Intermediate Code Generation)
 # ============================================================================
+echo -e "${GREEN}STEP 4: INTERMEDIATE CODE GENERATION ${NC}"
+echo -e "${YELLOW}────────────────────────────────────────────────────────────${NC}"
+
+# Check if ICG is compiled
+if [ ! -f "$ICG_DIR/icg" ]; then
+    echo -e "${YELLOW}Compiling ICG...${NC}"
+    make -C "$ICG_DIR" clean >/dev/null 2>&1
+    make -C "$ICG_DIR" >/dev/null 2>&1
+    echo -e "${GREEN}✓ ICG compiled${NC}"
+fi
+
+# Run ICG and capture output
+echo -e "${GREEN}Running ICG:${NC}"
+cd "$ICG_DIR"
+./icg "../$PROGRAM_FILE" icg_output.txt
+cd ..
+
+echo ""
+echo ""
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}✓ End of program ${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════════${NC}"
