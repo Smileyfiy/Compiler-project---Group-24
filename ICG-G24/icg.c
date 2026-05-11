@@ -286,22 +286,18 @@ void icg_process_statements(ParseTreeNode *node, ICGContext *ctx) {
     
     /* If this is a STATEMENT node, process it directly */
     if (node->type == NODE_STATEMENT) {
-        fprintf(stderr, "[DEBUG STMTS] Processing Statement node\n");
         icg_process_statement(node, ctx);
         return;
     }
     
     /* Otherwise, it should be a STATEMENTS node */
-    fprintf(stderr, "[DEBUG STMTS] Processing Statements node with %d children\n", node->child_count);
     
     for (int i = 0; i < node->child_count; i++) {
         ParseTreeNode *child = node->children[i];
         
         if (child->type == NODE_STATEMENT) {
-            fprintf(stderr, "[DEBUG STMTS] Found Statement child\n");
             icg_process_statement(child, ctx);
         } else if (child->type == NODE_STATEMENTS) {
-            fprintf(stderr, "[DEBUG STMTS] Found Statements child, recursing\n");
             icg_process_statements(child, ctx);
         }
     }
@@ -310,36 +306,26 @@ void icg_process_statements(ParseTreeNode *node, ICGContext *ctx) {
 void icg_process_statement(ParseTreeNode *node, ICGContext *ctx) {
     if (!node || !ctx) return;
     
-    fprintf(stderr, "[DEBUG STMT] Processing statement with %d children\n", node->child_count);
-    
     for (int i = 0; i < node->child_count; i++) {
         ParseTreeNode *child = node->children[i];
         
-        fprintf(stderr, "[DEBUG STMT] Child %d type: %d\n", i, child->type);
-        
         switch (child->type) {
             case NODE_DECLARATION:
-                fprintf(stderr, "[DEBUG STMT] -> Declaration\n");
                 icg_process_declaration(child, ctx);
                 break;
             case NODE_ASSIGNMENT:
-                fprintf(stderr, "[DEBUG STMT] -> Assignment\n");
                 icg_process_assignment(child, ctx);
                 break;
             case NODE_IF_STATEMENT:
-                fprintf(stderr, "[DEBUG STMT] -> If\n");
                 icg_process_if_statement(child, ctx);
                 break;
             case NODE_WHILE_STATEMENT:
-                fprintf(stderr, "[DEBUG STMT] -> While\n");
                 icg_process_while_statement(child, ctx);
                 break;
             case NODE_FOR_STATEMENT:
-                fprintf(stderr, "[DEBUG STMT] -> For\n");
                 icg_process_for_statement(child, ctx);
                 break;
             default:
-                fprintf(stderr, "[DEBUG STMT] -> Unknown type %d\n", child->type);
                 break;
         }
     }
@@ -379,8 +365,6 @@ void icg_process_assignment(ParseTreeNode *node, ICGContext *ctx) {
     char var_name[100] = "";
     char *rhs_result = NULL;
     
-    fprintf(stderr, "[DEBUG ASSIGN] Processing assignment with %d children\n", node->child_count);
-    
     /* Find identifier and expression in children */
     int id_count = 0;
     for (int i = 0; i < node->child_count; i++) {
@@ -388,24 +372,17 @@ void icg_process_assignment(ParseTreeNode *node, ICGContext *ctx) {
         
         if (!child) continue;
         
-        fprintf(stderr, "[DEBUG ASSIGN] Child %d type: %d, value: %s\n", i, child->type, child->value);
-        
         if (child->type == NODE_IDENTIFIER) {
             id_count++;
             if (id_count == 1 && var_name[0] == '\0') {
                 strncpy(var_name, child->value, 99);
                 var_name[99] = '\0';
-                fprintf(stderr, "[DEBUG ASSIGN] Found first identifier: %s\n", var_name);
             } else {
-                fprintf(stderr, "[DEBUG ASSIGN] Found identifier #%d: %s\n", id_count, child->value);
             }
         } else if (child->type == NODE_EXPRESSION) {
             rhs_result = icg_process_expression(child, ctx);
-            fprintf(stderr, "[DEBUG ASSIGN] Found expression result: %s\n", rhs_result);
         }
     }
-    
-    fprintf(stderr, "[DEBUG ASSIGN] Final: var_name=%s, rhs_result=%s\n", var_name, rhs_result ? rhs_result : "(null)");
     
     if (var_name[0] && rhs_result && rhs_result[0]) {
         /* Check if variable was declared */
@@ -413,7 +390,6 @@ void icg_process_assignment(ParseTreeNode *node, ICGContext *ctx) {
             symbol_table_insert(ctx->symbol_table, var_name, "int", ctx->scope_level);
         }
         
-        fprintf(stderr, "[DEBUG ASSIGN] Emitting quad: %s = %s\n", var_name, rhs_result);
         icg_emit_quad(ctx, OP_ASSIGN, rhs_result, "", var_name);
     }
 }
@@ -466,17 +442,13 @@ void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
     char *exit_label = icg_get_label(ctx);
     char *condition_result = NULL;
     
-    fprintf(stderr, "[DEBUG WHILE] Processing while with %d children\n", node->child_count);
-    
     /* Loop label */
     icg_emit_quad(ctx, OP_LABEL, loop_label, "", "");
     
     /* Process condition */
     for (int i = 0; i < node->child_count; i++) {
-        fprintf(stderr, "[DEBUG WHILE] Child %d type: %d\n", i, node->children[i]->type);
         if (node->children[i]->type == NODE_EXPRESSION) {
             condition_result = icg_process_expression(node->children[i], ctx);
-            fprintf(stderr, "[DEBUG WHILE] Found condition expression\n");
         }
     }
     
@@ -485,12 +457,9 @@ void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
         icg_emit_quad(ctx, OP_IF_GOTO, condition_result, "0", exit_label);
         
         /* Process loop body */
-        fprintf(stderr, "[DEBUG WHILE] Processing body with loop_label=%s, exit_label=%s\n", loop_label, exit_label);
         for (int i = 0; i < node->child_count; i++) {
-            fprintf(stderr, "[DEBUG WHILE] Body child %d type: %d\n", i, node->children[i]->type);
             if (node->children[i]->type == NODE_STATEMENTS ||
                 node->children[i]->type == NODE_STATEMENT) {
-                fprintf(stderr, "[DEBUG WHILE] Processing body statement/statements\n");
                 icg_process_statements(node->children[i], ctx);
             }
         }
@@ -520,18 +489,14 @@ char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx) {
     
     /* Handle different node types */
     if (node->type == NODE_NUMBER) {
-        fprintf(stderr, "[DEBUG] Expression->Number: %s\n", node->value);
         return expr_copy_string(node->value);
     }
     
     if (node->type == NODE_IDENTIFIER) {
-        fprintf(stderr, "[DEBUG] Expression->Identifier: %s\n", node->value);
         return expr_copy_string(node->value);
     }
     
     if (node->type == NODE_EXPRESSION && node->child_count > 0) {
-        fprintf(stderr, "[DEBUG] Expression has %d children\n", node->child_count);
-        
         /* Look for binary operation: Expression Operator Expression */
         char *left = NULL;
         char *op_str = NULL;
@@ -539,29 +504,22 @@ char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx) {
         
         for (int i = 0; i < node->child_count; i++) {
             ParseTreeNode *child = node->children[i];
-            fprintf(stderr, "[DEBUG] Child %d type: %d\n", i, child->type);
             
             if (child->type == NODE_EXPRESSION && left == NULL) {
                 left = icg_process_expression(child, ctx);
-                fprintf(stderr, "[DEBUG] Set left from Expression: %s\n", left);
             } else if (child->type == NODE_OPERATOR) {
                 op_str = child->value;
-                fprintf(stderr, "[DEBUG] Found operator: %s\n", op_str);
             } else if (child->type == NODE_TERM && left == NULL) {
                 left = icg_process_term(child, ctx);
-                fprintf(stderr, "[DEBUG] Set left from Term: %s\n", left);
             } else if (child->type == NODE_EXPRESSION && op_str != NULL && right == NULL) {
                 right = icg_process_expression(child, ctx);
-                fprintf(stderr, "[DEBUG] Set right from Expression: %s\n", right);
             } else if (child->type == NODE_TERM && op_str != NULL && right == NULL) {
                 right = icg_process_term(child, ctx);
-                fprintf(stderr, "[DEBUG] Set right from Term: %s\n", right);
             }
         }
         
         /* If we found a binary operation, emit quad */
         if (left && left[0] && op_str && right && right[0]) {
-            fprintf(stderr, "[DEBUG] Emitting binary op: %s %s %s\n", left, op_str, right);
             OperationType op_type = icg_get_operator_type(op_str);
             char *temp = icg_get_temp_var(ctx);
             icg_emit_quad(ctx, op_type, left, right, temp);
@@ -570,27 +528,22 @@ char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx) {
         
         /* Otherwise just process as term */
         if (left && left[0]) {
-            fprintf(stderr, "[DEBUG] Returning left: %s\n", left);
             return left;
         }
         
         /* Or process first child */
-        fprintf(stderr, "[DEBUG] Processing first child\n");
         return icg_process_expression(node->children[0], ctx);
     }
     
     if (node->type == NODE_TERM && node->child_count > 0) {
-        fprintf(stderr, "[DEBUG] Delegating to process_term\n");
         return icg_process_term(node, ctx);
     }
     
     if (node->type == NODE_FACTOR && node->child_count > 0) {
-        fprintf(stderr, "[DEBUG] Delegating to process_factor\n");
         return icg_process_factor(node, ctx);
     }
     
     /* Default: return empty */
-    fprintf(stderr, "[DEBUG] Returning empty from expression\n");
     return "";
 }
 
@@ -599,26 +552,20 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx) {
     
     /* Base cases */
     if (node->type == NODE_NUMBER) {
-        fprintf(stderr, "[DEBUG TERM] Number: %s\n", node->value);
         return expr_copy_string(node->value);
     }
     
     if (node->type == NODE_IDENTIFIER) {
-        fprintf(stderr, "[DEBUG TERM] Identifier: %s\n", node->value);
         return expr_copy_string(node->value);
     }
     
     if (node->type == NODE_FACTOR && node->child_count > 0) {
-        fprintf(stderr, "[DEBUG TERM] Delegating Factor to process_factor\n");
         return icg_process_factor(node, ctx);
     }
     
     if (node->child_count == 0) {
-        fprintf(stderr, "[DEBUG TERM] No children, using value: %s\n", node->value);
         return expr_copy_string(node->value);
     }
-    
-    fprintf(stderr, "[DEBUG TERM] Term has %d children, processing them\n", node->child_count);
     
     /* Process binary operations: left op right */
     char *left = NULL;
@@ -626,13 +573,10 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx) {
     /* First child should be a Factor or Term */
     if (node->children[0]->type == NODE_FACTOR) {
         left = icg_process_factor(node->children[0], ctx);
-        fprintf(stderr, "[DEBUG TERM] Got left from Factor: %s\n", left);
     } else if (node->children[0]->type == NODE_TERM) {
         left = icg_process_term(node->children[0], ctx);
-        fprintf(stderr, "[DEBUG TERM] Got left from Term: %s\n", left);
     } else {
         left = icg_process_expression(node->children[0], ctx);
-        fprintf(stderr, "[DEBUG TERM] Got left from Expression: %s\n", left);
     }
     
     for (int i = 1; i < node->child_count; i += 2) {
@@ -661,11 +605,9 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx) {
     }
     
     if (left && left[0]) {
-        fprintf(stderr, "[DEBUG TERM] Returning: %s\n", left);
         return left;
     }
     
-    fprintf(stderr, "[DEBUG TERM] Returning empty\n");
     return "";
 }
 

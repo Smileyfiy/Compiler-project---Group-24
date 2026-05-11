@@ -583,7 +583,7 @@ static ParseTreeNode* parse_factor(Parser *parser) {
 
 /* Main parsing function - returns parse tree root */
 ParseTreeNode* parser_parse(Parser *parser) {
-    printf("=== LL(1) Parser Starting ===\n\n");
+
     
     ParseTreeNode *root = parse_program(parser);
     

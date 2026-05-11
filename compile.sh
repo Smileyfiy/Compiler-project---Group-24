@@ -125,7 +125,6 @@ if [ ! -f "$ICG_DIR/icg" ]; then
 fi
 
 # Run ICG and capture output
-echo -e "${GREEN}Running ICG:${NC}"
 cd "$ICG_DIR"
 ./icg "../$PROGRAM_FILE" icg_output.txt
 cd ..
