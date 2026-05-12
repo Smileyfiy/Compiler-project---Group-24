@@ -1,0 +1,15 @@
+int x
+int y
+int z
+x = 0
+y = 0
+z = 0
+
+if x < 10
+y = 1
+
+while x < 5
+x = x + 1
+
+for z < 3
+z = z + 1

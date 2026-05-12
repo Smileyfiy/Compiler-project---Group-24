@@ -406,21 +406,37 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
     if (!node || !ctx) return;
     
     char *condition_result = NULL;
+    char *start_label = NULL;
     char *else_label = NULL;
     char *end_label = NULL;
     
+    /* Process condition - may be an assignment or expression */
     for (int i = 0; i < node->child_count; i++) {
         ParseTreeNode *child = node->children[i];
         
-        if (child->type == NODE_EXPRESSION) {
+        if (child->type == NODE_ASSIGNMENT) {
+            /* If condition is an assignment, process it and use its result */
+            icg_process_assignment(child, ctx);
+            /* Get the identifier from assignment as the condition */
+            for (int j = 0; j < child->child_count; j++) {
+                if (child->children[j]->type == NODE_IDENTIFIER) {
+                    condition_result = expr_copy_string(child->children[j]->value);
+                    break;
+                }
+            }
+        } else if (child->type == NODE_EXPRESSION) {
             condition_result = icg_process_expression(child, ctx);
         }
     }
     
     if (condition_result) {
         /* Allocate permanent string storage for labels */
+        start_label = expr_alloc_string(icg_get_label(ctx));
         else_label = expr_alloc_string(icg_get_label(ctx));
         end_label = expr_alloc_string(icg_get_label(ctx));
+        
+        /* IF_START: Mark beginning of if block */
+        icg_emit_quad(ctx, OP_LABEL, start_label, "", "");
         
         /* IF_BEGIN: If condition is false, skip to else block */
         icg_emit_quad(ctx, OP_IF_GOTO, condition_result, "0", else_label);
@@ -443,6 +459,7 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
         icg_emit_quad(ctx, OP_LABEL, end_label, "", "");
         
         /* Free allocated labels */
+        free(start_label);
         free(else_label);
         free(end_label);
     }
@@ -459,9 +476,19 @@ void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
     /* Loop label - marks beginning of loop */
     icg_emit_quad(ctx, OP_LABEL, loop_label, "", "");
     
-    /* Process condition */
+    /* Process condition - may be an assignment or expression */
     for (int i = 0; i < node->child_count; i++) {
-        if (node->children[i]->type == NODE_EXPRESSION) {
+        if (node->children[i]->type == NODE_ASSIGNMENT) {
+            /* If condition is an assignment, process it and use its result */
+            icg_process_assignment(node->children[i], ctx);
+            /* Get the identifier from assignment as the condition */
+            for (int j = 0; j < node->children[i]->child_count; j++) {
+                if (node->children[i]->children[j]->type == NODE_IDENTIFIER) {
+                    condition_result = expr_copy_string(node->children[i]->children[j]->value);
+                    break;
+                }
+            }
+        } else if (node->children[i]->type == NODE_EXPRESSION) {
             condition_result = icg_process_expression(node->children[i], ctx);
         }
     }
