@@ -291,7 +291,6 @@ void icg_process_statements(ParseTreeNode *node, ICGContext *ctx) {
     }
     
     /* Otherwise, it should be a STATEMENTS node */
-    
     for (int i = 0; i < node->child_count; i++) {
         ParseTreeNode *child = node->children[i];
         
@@ -377,7 +376,6 @@ void icg_process_assignment(ParseTreeNode *node, ICGContext *ctx) {
             if (id_count == 1 && var_name[0] == '\0') {
                 strncpy(var_name, child->value, 99);
                 var_name[99] = '\0';
-            } else {
             }
         } else if (child->type == NODE_EXPRESSION) {
             rhs_result = icg_process_expression(child, ctx);
@@ -475,8 +473,10 @@ void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
 void icg_process_for_statement(ParseTreeNode *node, ICGContext *ctx) {
     if (!node || !ctx) return;
     
-    /* For now, treat for as a while loop */
-    /* Future: add proper for loop handling */
+    /* For loop structure mirrors while: for <condition> <body>
+       Parser produces: ForStatement → 'for' Expression Statement
+       which gives the same NODE_EXPRESSION + NODE_STATEMENT children
+       as a WhileStatement, so we reuse the same emission logic. */
     icg_process_while_statement(node, ctx);
 }
 
@@ -484,10 +484,29 @@ void icg_process_for_statement(ParseTreeNode *node, ICGContext *ctx) {
    Expression Processing - Recursive Descent
    ============================================================================ */
 
+/*
+ * icg_process_expression walks a NODE_EXPRESSION subtree and returns the
+ * name of the variable/temp that holds the result.
+ *
+ * The parser builds comparison expressions (x < 5) as a flat
+ * NODE_EXPRESSION with three children:
+ *
+ *   Expression
+ *     ├─ Expression   (left operand)
+ *     ├─ Operator     ("<", ">", "+", etc.)
+ *     └─ Expression   (right operand)
+ *
+ * The original code only handled NODE_EXPRESSION and NODE_TERM children,
+ * silently skipping NODE_OPERATOR.  This caused the LHS and operator to
+ * be lost: `x < 5` returned "5" instead of emitting `t0 = x < 5`.
+ *
+ * Fix: track a pending operator whenever we encounter NODE_OPERATOR, then
+ * emit a binary quad the next time we resolve a child expression.
+ */
 char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx) {
     if (!node || !ctx) return "";
     
-    /* Handle different node types */
+    /* Leaf cases */
     if (node->type == NODE_NUMBER) {
         return expr_copy_string(node->value);
     }
@@ -497,31 +516,41 @@ char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx) {
     }
     
     if (node->type == NODE_EXPRESSION && node->child_count > 0) {
-        char *result = NULL;
+        char *result      = NULL;
+        char *pending_op  = NULL;   /* operator waiting for its right operand */
         
-        /* Process all children, accumulating the result */
         for (int i = 0; i < node->child_count; i++) {
             ParseTreeNode *child = node->children[i];
             
-            if (child->type == NODE_EXPRESSION) {
-                char *expr_result = icg_process_expression(child, ctx);
-                if (expr_result && expr_result[0]) {
-                    result = expr_result;
+            if (child->type == NODE_OPERATOR) {
+                /* Save the operator; the next resolved child is the RHS */
+                pending_op = child->value;
+
+            } else if (child->type == NODE_EXPRESSION) {
+                char *val = icg_process_expression(child, ctx);
+                if (!val || !val[0]) continue;
+
+                if (result && pending_op) {
+                    /* Emit:  temp = result <op> val  */
+                    char *temp = icg_get_temp_var(ctx);
+                    icg_emit_quad(ctx, icg_get_operator_type(pending_op),
+                                  result, val, temp);
+                    result     = expr_copy_string(temp);
+                    pending_op = NULL;
+                } else {
+                    result = val;
                 }
+
             } else if (child->type == NODE_TERM) {
-                /* Pass accumulated result as left operand for the term */
-                char *term_result = icg_process_term(child, ctx, result);
-                if (term_result && term_result[0]) {
-                    result = term_result;
+                /* Pass accumulated result as left operand into the term */
+                char *val = icg_process_term(child, ctx, result);
+                if (val && val[0]) {
+                    result = val;
                 }
             }
         }
         
-        if (result && result[0]) {
-            return result;
-        }
-        
-        return "";
+        return (result && result[0]) ? result : "";
     }
     
     if (node->type == NODE_TERM && node->child_count > 0) {
@@ -560,8 +589,8 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
         return expr_copy_string(node->value);
     }
     
-    /* If first child is an operator, this is an expression term (like AddExpr)
-       Use the provided left_operand and process this as right-associative operations */
+    /* If first child is an operator, this is an AddExpr/MulExpr tail node.
+       Use the provided left_operand as the LHS. */
     if (node->children[0]->type == NODE_OPERATOR) {
         char *left = left_operand;
         
@@ -571,11 +600,10 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
             if (child->type == NODE_EPSILON) {
                 continue;
             } else if (child->type == NODE_OPERATOR) {
-                /* Found operator, get it */
                 char *op_str = child->value;
                 OperationType op_type = icg_get_operator_type(op_str);
                 
-                /* Process remaining children to build right operand */
+                /* Next child is the right operand */
                 i++;
                 char *right = NULL;
                 if (i < node->child_count) {
@@ -583,7 +611,6 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
                     if (right_node->type == NODE_FACTOR) {
                         right = icg_process_factor(right_node, ctx);
                     } else if (right_node->type == NODE_TERM) {
-                        /* This might be another MulExpr/AddExpr, process it */
                         right = icg_process_term(right_node, ctx, NULL);
                     } else if (right_node->type == NODE_EXPRESSION) {
                         right = icg_process_expression(right_node, ctx);
@@ -601,10 +628,9 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
         return left ? (left[0] ? left : (left_operand ? expr_copy_string(left_operand) : "")) : "";
     }
     
-    /* Normal term processing: Term → Factor MulExpr */
+    /* Normal term: Term → Factor MulExpr */
     char *left = NULL;
     
-    /* First child should be a Factor or Term */
     if (node->children[0]->type == NODE_FACTOR) {
         left = icg_process_factor(node->children[0], ctx);
     } else if (node->children[0]->type == NODE_TERM) {
@@ -613,7 +639,7 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
         left = icg_process_expression(node->children[0], ctx);
     }
     
-    /* Process remaining children (MulExpr or AddExpr) */
+    /* Process remaining children (MulExpr or AddExpr tail nodes) */
     for (int i = 1; i < node->child_count; i++) {
         ParseTreeNode *child = node->children[i];
         
@@ -621,11 +647,9 @@ char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand)
             continue;
         }
         
-        /* If child is a Term (MulExpr/AddExpr), process it with our left operand */
         if (child->type == NODE_TERM) {
             left = icg_process_term(child, ctx, left);
         } else if (child->type == NODE_FACTOR) {
-            /* Shouldn't happen in normal parsing, but handle it */
             char *right = icg_process_factor(child, ctx);
             if (left && left[0] && right && right[0]) {
                 char *temp = icg_get_temp_var(ctx);
