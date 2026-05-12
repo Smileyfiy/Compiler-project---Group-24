@@ -9,7 +9,7 @@ Group 24
    Buffer Management for Expression Processing
    ============================================================================ */
 
-#define EXPR_BUFFER_POOL_SIZE 20
+#define EXPR_BUFFER_POOL_SIZE 200
 #define EXPR_BUFFER_SIZE 100
 
 typedef struct {
@@ -31,6 +31,16 @@ char* expr_copy_string(const char *src) {
     if (src) {
         strncpy(dest, src, EXPR_BUFFER_SIZE - 1);
         dest[EXPR_BUFFER_SIZE - 1] = '\0';
+    }
+    return dest;
+}
+
+/* Allocate a permanent copy of a string (not from the pool) */
+char* expr_alloc_string(const char *src) {
+    if (!src) return malloc(1);
+    char *dest = (char *)malloc(strlen(src) + 1);
+    if (dest) {
+        strcpy(dest, src);
     }
     return dest;
 }
@@ -408,13 +418,14 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
     }
     
     if (condition_result) {
-        else_label = icg_get_label(ctx);
-        end_label = icg_get_label(ctx);
+        /* Allocate permanent string storage for labels */
+        else_label = expr_alloc_string(icg_get_label(ctx));
+        end_label = expr_alloc_string(icg_get_label(ctx));
         
-        /* Jump to else if condition is false */
+        /* IF_BEGIN: If condition is false, skip to else block */
         icg_emit_quad(ctx, OP_IF_GOTO, condition_result, "0", else_label);
         
-        /* Process if body */
+        /* IF_BODY: Process if statement body */
         for (int i = 0; i < node->child_count; i++) {
             if (node->children[i]->type == NODE_STATEMENTS ||
                 node->children[i]->type == NODE_STATEMENT) {
@@ -422,25 +433,30 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
             }
         }
         
-        /* Jump to end */
+        /* Jump to end of if statement */
         icg_emit_quad(ctx, OP_GOTO, end_label, "", "");
         
-        /* Else label */
+        /* ELSE_BEGIN: Mark beginning of else block */
         icg_emit_quad(ctx, OP_LABEL, else_label, "", "");
         
-        /* End label */
+        /* IF_END: Mark end of if statement */
         icg_emit_quad(ctx, OP_LABEL, end_label, "", "");
+        
+        /* Free allocated labels */
+        free(else_label);
+        free(end_label);
     }
 }
 
 void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
     if (!node || !ctx) return;
     
-    char *loop_label = icg_get_label(ctx);
-    char *exit_label = icg_get_label(ctx);
+    /* Allocate permanent string storage for labels to avoid buffer pool overwriting */
+    char *loop_label = expr_alloc_string(icg_get_label(ctx));
+    char *exit_label = expr_alloc_string(icg_get_label(ctx));
     char *condition_result = NULL;
     
-    /* Loop label */
+    /* Loop label - marks beginning of loop */
     icg_emit_quad(ctx, OP_LABEL, loop_label, "", "");
     
     /* Process condition */
@@ -462,12 +478,16 @@ void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx) {
             }
         }
         
-        /* Jump back to loop */
+        /* Jump back to loop start */
         icg_emit_quad(ctx, OP_GOTO, loop_label, "", "");
         
-        /* Exit label */
+        /* Exit label - marks loop end */
         icg_emit_quad(ctx, OP_LABEL, exit_label, "", "");
     }
+    
+    /* Free allocated labels */
+    free(loop_label);
+    free(exit_label);
 }
 
 void icg_process_for_statement(ParseTreeNode *node, ICGContext *ctx) {

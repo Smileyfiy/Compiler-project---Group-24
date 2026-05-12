@@ -1,0 +1,21 @@
+
+========== INTERMEDIATE CODE (QUADRUPLES) ==========
+NUM   | OP              | ARG1            | ARG2            | RESULT         
+------|-----------------|-----------------|-----------------|------------------
+0     | declare         | int             | -               | x              
+1     | declare         | int             | -               | y              
+2     | =               | 0               | -               | x              
+3     | label           | L0              | -               | -              
+4     | <               | x               | 5               | t0             
+5     | if_goto         | t0              | 0               | L1             
+6     | +               | x               | 1               | t1             
+7     | =               | t1              | -               | y              
+8     | +               | x               | 1               | t2             
+9     | =               | t2              | -               | x              
+10    | goto            | L0              | -               | -              
+11    | label           | L1              | -               | -              
+12    | end             | -               | -               | -              
+
+x                    | int        | 0         
+y                    | int        | 0         
+

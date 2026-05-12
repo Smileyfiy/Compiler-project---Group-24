@@ -2,10 +2,6 @@ int x
 int y
 x = 0
 
-if x > 5
+for x < 5
 y = x + 1
-x = y
-
-x = 10
-
-
+x = x + 1

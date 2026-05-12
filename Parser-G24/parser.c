@@ -351,7 +351,7 @@ static ParseTreeNode* parse_while_statement(Parser *parser) {
     return node;
 }
 
-/* ForStatement → for Assignment Statements */
+/* ForStatement → for Expression Statements */
 static ParseTreeNode* parse_for_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_FOR_STATEMENT, NULL);
     
@@ -364,9 +364,9 @@ static ParseTreeNode* parse_for_statement(Parser *parser) {
     ast_add_child(node, ast_create_node(NODE_KEYWORD, "for"));
     lexer_read_token(parser);
     
-    ParseTreeNode *assign = parse_assignment(parser);
-    if (assign) {
-        ast_add_child(node, assign);
+    ParseTreeNode *expr = parse_expression(parser);
+    if (expr) {
+        ast_add_child(node, expr);
     } else {
         ast_free_tree(node);
         return NULL;

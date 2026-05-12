@@ -5,7 +5,7 @@ NUM   | OP              | ARG1            | ARG2            | RESULT
 0     | declare         | int             | -               | x              
 1     | declare         | int             | -               | y              
 2     | =               | 0               | -               | x              
-3     | >               | x               | 5               | t0             
+3     | <               | x               | 5               | t0             
 4     | if_goto         | t0              | 0               | L0             
 5     | +               | x               | 1               | t1             
 6     | =               | t1              | -               | y              
@@ -13,8 +13,9 @@ NUM   | OP              | ARG1            | ARG2            | RESULT
 8     | label           | L0              | -               | -              
 9     | label           | L1              | -               | -              
 10    | =               | y               | -               | x              
-11    | =               | 10              | -               | x              
-12    | end             | -               | -               | -              
+11    | +               | x               | 1               | t2             
+12    | =               | t2              | -               | x              
+13    | end             | -               | -               | -              
 
 x                    | int        | 0         
 y                    | int        | 0         
