@@ -2,18 +2,21 @@
 ========== INTERMEDIATE CODE (QUADRUPLES) ==========
 NUM   | OP              | ARG1            | ARG2            | RESULT         
 ------|-----------------|-----------------|-----------------|------------------
-0     | declare         | int             | -               | x              
-1     | declare         | int             | -               | y              
-2     | =               | 0               | -               | x              
-3     | label           | L0              | -               | -              
-4     | <               | x               | 5               | t0             
-5     | if_goto         | t0              | 0               | L1             
-6     | +               | x               | 1               | t1             
-7     | =               | t1              | -               | y              
-8     | =               | y               | -               | x              
-9     | goto            | L0              | -               | -              
-10    | label           | L1              | -               | -              
-11    | end             | -               | -               | -              
+0     | DECLARE         | int             | -               | x              
+1     | DECLARE         | int             | -               | y              
+2     | ASSIGN          | 0               | -               | x              
+3     | ASSIGN          | 1               | -               | y              
+4     | LABEL           | L0              | -               | -              
+5     | LT              | x               | 5               | t0             
+6     | IFF_GOTO        | t0              | 0               | L1             
+7     | MUL             | y               | x               | t1             
+8     | ADD             | x               | t1              | t2             
+9     | ASSIGN          | t2              | -               | y              
+10    | ADD             | x               | 1               | t3             
+11    | ASSIGN          | t3              | -               | x              
+12    | GOTO            | L0              | -               | -              
+13    | LABEL           | L1              | -               | -              
+14    | END             | -               | -               | -              
 
 x                    | int        | 0         
 y                    | int        | 0         

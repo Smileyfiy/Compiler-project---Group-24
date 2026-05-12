@@ -232,19 +232,19 @@ OperationType icg_get_operator_type(const char *op_str) {
 
 const char* icg_operator_to_string(OperationType op) {
     switch (op) {
-        case OP_ASSIGN:     return "=";
-        case OP_ADD:        return "+";
-        case OP_SUB:        return "-";
-        case OP_MUL:        return "*";
-        case OP_MOD:        return "%";
-        case OP_LT:         return "<";
-        case OP_GT:         return ">";
-        case OP_LABEL:      return "label";
-        case OP_GOTO:       return "goto";
-        case OP_IF_GOTO:    return "if_goto";
-        case OP_DECLARE:    return "declare";
-        case OP_END:        return "end";
-        default:            return "unknown";
+        case OP_ASSIGN:     return "ASSIGN";
+        case OP_ADD:        return "ADD";
+        case OP_SUB:        return "SUB";
+        case OP_MUL:        return "MUL";
+        case OP_MOD:        return "MOD";
+        case OP_LT:         return "LT";
+        case OP_GT:         return "GT";
+        case OP_LABEL:      return "LABEL";
+        case OP_GOTO:       return "GOTO";
+        case OP_IF_GOTO:    return "IFF_GOTO";
+        case OP_DECLARE:    return "DECLARE";
+        case OP_END:        return "END";
+        default:            return "UNKNOWN";
     }
 }
 
