@@ -103,7 +103,7 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx);
 void icg_process_while_statement(ParseTreeNode *node, ICGContext *ctx);
 void icg_process_for_statement(ParseTreeNode *node, ICGContext *ctx);
 char* icg_process_expression(ParseTreeNode *node, ICGContext *ctx);
-char* icg_process_term(ParseTreeNode *node, ICGContext *ctx);
+char* icg_process_term(ParseTreeNode *node, ICGContext *ctx, char *left_operand);
 char* icg_process_factor(ParseTreeNode *node, ICGContext *ctx);
 
 /* Utility Functions */

@@ -5,14 +5,18 @@ NUM   | OP              | ARG1            | ARG2            | RESULT
 0     | declare         | int             | -               | x              
 1     | declare         | int             | -               | y              
 2     | =               | 0               | -               | x              
-3     | label           | L0              | -               | -              
-4     | <               | x               | 5               | t0             
-5     | if_goto         | t0              | 0               | L1             
-6     | =               | x               | -               | y              
-7     | goto            | L0              | -               | -              
-8     | label           | L1              | -               | -              
-9     | =               | x               | -               | x              
-10    | end             | -               | -               | -              
+3     | *               | 1               | 7               | t0             
+4     | +               | x               | t0              | t1             
+5     | =               | t1              | -               | y              
+6     | if_goto         | 5               | 0               | L0             
+7     | =               | x               | -               | y              
+8     | goto            | L1              | -               | -              
+9     | label           | L0              | -               | -              
+10    | label           | L1              | -               | -              
+11    | *               | 6               | 5               | t2             
+12    | +               | 7               | t2              | t3             
+13    | =               | t3              | -               | y              
+14    | end             | -               | -               | -              
 
 x                    | int        | 0         
 y                    | int        | 0         

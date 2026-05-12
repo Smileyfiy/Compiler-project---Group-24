@@ -1,6 +1,12 @@
 int x
 int y
 x = 0
-while x < 5
+
+y = x + 1 * 7
+
+if x < 5
 y = x
-x = x + 1
+
+y = 7 + 6 * 5 
+
+

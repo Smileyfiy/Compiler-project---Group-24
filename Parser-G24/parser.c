@@ -319,7 +319,7 @@ static ParseTreeNode* parse_if_statement(Parser *parser) {
     return node;
 }
 
-/* WhileStatement → while Expression Statement */
+/* WhileStatement → while Expression Statements */
 static ParseTreeNode* parse_while_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_WHILE_STATEMENT, NULL);
     
@@ -340,9 +340,9 @@ static ParseTreeNode* parse_while_statement(Parser *parser) {
         return NULL;
     }
     
-    ParseTreeNode *stmt = parse_statement(parser);
-    if (stmt) {
-        ast_add_child(node, stmt);
+    ParseTreeNode *stmts = parse_statements(parser);
+    if (stmts) {
+        ast_add_child(node, stmts);
     } else {
         ast_free_tree(node);
         return NULL;
@@ -351,7 +351,7 @@ static ParseTreeNode* parse_while_statement(Parser *parser) {
     return node;
 }
 
-/* ForStatement → for Assignment Statement */
+/* ForStatement → for Assignment Statements */
 static ParseTreeNode* parse_for_statement(Parser *parser) {
     ParseTreeNode *node = ast_create_node(NODE_FOR_STATEMENT, NULL);
     
@@ -372,9 +372,9 @@ static ParseTreeNode* parse_for_statement(Parser *parser) {
         return NULL;
     }
     
-    ParseTreeNode *stmt = parse_statement(parser);
-    if (stmt) {
-        ast_add_child(node, stmt);
+    ParseTreeNode *stmts = parse_statements(parser);
+    if (stmts) {
+        ast_add_child(node, stmts);
     } else {
         ast_free_tree(node);
         return NULL;
