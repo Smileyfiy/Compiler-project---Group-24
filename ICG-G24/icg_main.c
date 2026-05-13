@@ -82,14 +82,7 @@ int main(int argc, char *argv[]) {
     quad_list_print(icg_ctx->quad_list, stdout);
     quad_list_print(icg_ctx->quad_list, output_file);
     
-    fprintf(stdout, "Symbol Table:\n");
-    fprintf(stdout, "%-20s | %-10s | %-10s\n", "Variable", "Type", "Scope");
-    fprintf(stdout, "--------------------|-----------|----------\n");
-    for (int i = 0; i < icg_ctx->symbol_table->count; i++) {
-        Symbol *sym = &icg_ctx->symbol_table->symbols[i];
-        fprintf(stdout, "%-20s | %-10s | %-10d\n", sym->name, sym->type, sym->scope_level);
-        fprintf(output_file, "%-20s | %-10s | %-10d\n", sym->name, sym->type, sym->scope_level);
-    }
+    
     fprintf(stdout, "\n");
     fprintf(output_file, "\n");
     

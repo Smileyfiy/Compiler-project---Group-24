@@ -432,7 +432,7 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
     if (condition_result) {
         /* Allocate permanent string storage for labels */
         start_label = expr_alloc_string(icg_get_label(ctx));
-        else_label = expr_alloc_string(icg_get_label(ctx));
+        
         end_label = expr_alloc_string(icg_get_label(ctx));
         
         /* IF_START: Mark beginning of if block */
@@ -452,9 +452,7 @@ void icg_process_if_statement(ParseTreeNode *node, ICGContext *ctx) {
         /* Jump to end of if statement */
         icg_emit_quad(ctx, OP_GOTO, end_label, "", "");
         
-        /* ELSE_BEGIN: Mark beginning of else block */
-        icg_emit_quad(ctx, OP_LABEL, else_label, "", "");
-        
+               
         /* IF_END: Mark end of if statement */
         icg_emit_quad(ctx, OP_LABEL, end_label, "", "");
         
